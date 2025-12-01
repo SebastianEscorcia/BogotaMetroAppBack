@@ -1,6 +1,8 @@
 package com.sena.BogotaMetroApp.mapper.pago;
 
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.persistence.repository.pasarela.PasarelaRepository;
+import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import org.springframework.stereotype.Component;
 
 import com.sena.BogotaMetroApp.presentation.dto.pago.PagoRequestDTO;
@@ -10,7 +12,6 @@ import com.sena.BogotaMetroApp.persistence.models.pago.Pago;
 import com.sena.BogotaMetroApp.persistence.models.pasarela.Pasarela;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 
-import com.sena.BogotaMetroApp.persistence.repository.pago.PagoRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -19,26 +20,21 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class PagoMapper {
 
-    private final PagoRepository pagoRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasarelaRepository pasarelaRepository;
 
     /**
-     * Convierte PagoRequestDTO a entidad Pago y lo persiste
+     *  Retorna la Entidad 'Pago' sin guardar.
      */
-    public PagoResponseDTO toEntity(PagoRequestDTO dto) {
-        // Validar usuario
+    public Pago toEntity(PagoRequestDTO dto) {
+        // Validar existencia de entidades relacionadas es aceptable en el Mapper
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new UsuarioException(ErrorCodeEnum.USUARIO_NOT_FOUND));
 
-        // Validar pasarela
         Pasarela pasarela = pasarelaRepository.findById(dto.getIdPasarela())
                 .orElseThrow(() -> new RuntimeException("Pasarela no encontrada"));
 
-        // Validar referencia única
-        if (pagoRepository.findByReferenciaPasarela(dto.getReferenciaPasarela()).isPresent()) {
-            throw new RuntimeException("Ya existe un pago con esta referencia");
-        }
+
 
         Pago pago = new Pago();
         pago.setUsuario(usuario);
@@ -48,10 +44,11 @@ public class PagoMapper {
         pago.setReferenciaPasarela(dto.getReferenciaPasarela());
         pago.setMoneda(dto.getMoneda() != null ? dto.getMoneda() : "COP");
         pago.setMedioDePago(dto.getMedioDePago());
+
+
         pago.setFechaPago(LocalDateTime.now());
 
-        pagoRepository.save(pago);
-        return toDTO(pago);
+        return pago;
     }
 
     /**
@@ -69,7 +66,10 @@ public class PagoMapper {
 
         if (pago.getUsuario() != null) {
             dto.setIdUsuario(pago.getUsuario().getId());
-            dto.setNombreUsuario(pago.getUsuario().getDatosPersonales().getNombreCompleto());
+            // Manejo de null pointer si datos personales es null
+            if (pago.getUsuario().getDatosPersonales() != null) {
+                dto.setNombreUsuario(pago.getUsuario().getDatosPersonales().getNombreCompleto());
+            }
         }
 
         if (pago.getPasarela() != null) {

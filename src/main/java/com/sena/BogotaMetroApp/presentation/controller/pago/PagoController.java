@@ -1,12 +1,16 @@
 package com.sena.BogotaMetroApp.presentation.controller.pago;
 
+import com.sena.BogotaMetroApp.persistence.models.Usuario;
+import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.presentation.dto.pago.PagoRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.pago.PagoResponseDTO;
 import com.sena.BogotaMetroApp.services.pago.IPagoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -14,13 +18,22 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/pagos")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class PagoController {
 
     private final IPagoService pagoService;
+    private final UsuarioRepository usuarioRepository;
 
     @PostMapping("/registrar")
-    public ResponseEntity<PagoResponseDTO> registrarPago(@RequestBody PagoRequestDTO dto) {
+    public ResponseEntity<PagoResponseDTO> registrarPago(@RequestBody PagoRequestDTO dto, Authentication authentication) {
+        String correoAutenticado = authentication.getName();
+
+        Usuario usuarioToken = usuarioRepository.findByCorreo(correoAutenticado)
+                .orElseThrow(() -> new RuntimeException("Usuario del token no encontrado"));
+
+        dto.setIdUsuario(usuarioToken.getId());
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(pagoService.registrarPago(dto));
     }

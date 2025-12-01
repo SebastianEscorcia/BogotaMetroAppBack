@@ -20,11 +20,12 @@ public enum ErrorCodeEnum implements ErrorCode {
     PAGO_NOT_FOUND("PAGO_NOT_FOUND", "Pago no encontrado en el sistema"),
     PAGO_INVALID("PAGO_INVALID", "Pago inválido"),
     PAGO_DUPLICADO("PAGO_DUPLICADO", "Ya existe un pago con esta referencia"),
+    SALDO_INSUFICIENTE("SALDO_INSUFICIENTE" , "Saldo Insuficiente"),
 
     // Usuario Errors
     USUARIO_NOT_FOUND("USUARIO_NOT_FOUND", "Usuario no encontrado en  el sistema"),
     USUARIO_INACTIVO("USUARIO_INACTIVO", "El usuario está inactivo"),
-
+    USUARIO_DONT_CARD_ACTIVE("USUARIO_SIN_TARJETA" , "El usuario no tiene una tarjeta virtual activa"),
 
     // Pasajero Errors
     PASAJERO_USUARIO_NO_EXISTE("PAS-404", "El usuario no existe"),
@@ -35,11 +36,12 @@ public enum ErrorCodeEnum implements ErrorCode {
     VIAJE_NOT_FOUND("VIAJE_NOT_FOUND", "Viaje no encontrado en el sistema"),
     VIAJE_YA_FINALIZADO("VIAJE_YA_FINALIZADO", "Este viaje ya ha finalizado"),
 
-
     //Pasarela Errors
     PASARELA_NOT_FOUND("PASARELA_NOT_FOUND", "Pasarela de pago no encontrada"),
     PASARELA_INACTIVA("PASARELA_INACTIVA", "La pasarela de pago está inactiva"),
 
+    // Tarjeta Errors,
+    NUM_CARD_FORMAT("NUM_CARD_FORMAT", "Número de la tarjeta no tiene formato"),
     //General Errors
     INTERNAL_ERROR("INTERNAL_ERROR", "Error interno del servidor"),
     VALIDATION_ERROR("VALIDATION_ERROR", "Error de validación de datos"),

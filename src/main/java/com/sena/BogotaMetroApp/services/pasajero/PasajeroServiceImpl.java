@@ -2,7 +2,9 @@ package com.sena.BogotaMetroApp.services.pasajero;
 
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.persistence.models.DatosPersonales;
+import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
 import com.sena.BogotaMetroApp.persistence.repository.DatosPersonalesRepository;
+import com.sena.BogotaMetroApp.persistence.repository.TarjetaVirtualRepository;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroResponseDTO;
 import com.sena.BogotaMetroApp.mapper.pasajero.PasajeroMapper;
@@ -16,10 +18,12 @@ import com.sena.BogotaMetroApp.services.exception.pasajero.PasajeroException;
 import com.sena.BogotaMetroApp.services.factory.DatosPersonalesFactory;
 import com.sena.BogotaMetroApp.services.factory.PasajeroFactory;
 import com.sena.BogotaMetroApp.services.factory.UsuarioFactory;
+import com.sena.BogotaMetroApp.utils.logic.TarjetaUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +34,8 @@ public class PasajeroServiceImpl implements IPasajeroService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioFactory usuarioFactory;
     private final DatosPersonalesRepository datosPersonalesRepository;
-    private final DatosPersonalesFactory  datosPersonalesFactory;
+    private final DatosPersonalesFactory datosPersonalesFactory;
+    private final TarjetaVirtualRepository tarjetaVirtualRepository;
     private final PasajeroFactory pasajeroFactory;
     private final PasajeroMapper mapper;
 
@@ -40,6 +45,7 @@ public class PasajeroServiceImpl implements IPasajeroService {
         Usuario user = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new PasajeroException(ErrorCodeEnum.PASAJERO_USUARIO_NO_EXISTE));
 
+
         if (user.getPasajero() != null) {
             throw new PasajeroException(ErrorCodeEnum.PASAJERO_YA_EXISTE);
         }
@@ -48,7 +54,15 @@ public class PasajeroServiceImpl implements IPasajeroService {
         pasajero.setUsuario(user);
         pasajero.setId(user.getId());
 
+        TarjetaVirtual nuevaTarjeta = new TarjetaVirtual();
+        nuevaTarjeta.setSaldo(BigDecimal.ZERO);
+        nuevaTarjeta.setEstado("ACTIVA");
+        nuevaTarjeta.setNumeroTarjeta(TarjetaUtil.generarNumeroTarjeta());
+        nuevaTarjeta.setPasajero(pasajero);
+        pasajero.setTarjetaVirtual(nuevaTarjeta);
+
         user.setPasajero(pasajero);
+        tarjetaVirtualRepository.save(nuevaTarjeta);
         pasajeroRepository.save(pasajero);
         usuarioRepository.save(user);
 
@@ -104,15 +118,27 @@ public class PasajeroServiceImpl implements IPasajeroService {
 
         // Crear objetos con factories
         Usuario usuario = usuarioFactory.crearDesdeRegistro(dto);
-        usuarioRepository.save(usuario);
+        usuario = usuarioRepository.save(usuario);
 
         DatosPersonales dp = datosPersonalesFactory.crearDesdeRegistro(dto, usuario);
         usuario.setDatosPersonales(dp);
         datosPersonalesRepository.save(dp);
 
         Pasajero pasajero = pasajeroFactory.crear(usuario);
+        pasajero.setId(usuario.getId());
+        pasajero = pasajeroRepository.save(pasajero);
         usuario.setPasajero(pasajero);
-        pasajeroRepository.save(pasajero);
+
+
+        TarjetaVirtual nuevaTarjeta = new TarjetaVirtual();
+        nuevaTarjeta.setSaldo(BigDecimal.ZERO);
+        nuevaTarjeta.setEstado("ACTIVA");
+        nuevaTarjeta.setNumeroTarjeta(TarjetaUtil.generarNumeroTarjeta());
+        nuevaTarjeta.setPasajero(pasajero);
+
+
+        tarjetaVirtualRepository.save(nuevaTarjeta);
+        pasajero.setTarjetaVirtual(nuevaTarjeta);
 
         // Respuesta
         return mapper.toDTO(pasajero);

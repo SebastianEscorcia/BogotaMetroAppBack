@@ -9,6 +9,7 @@ public class PasajeroResponseDTO {
 
     private Long id;
     private Long idUsuario;
+    private Long idTarjetaVirtual;
     private String correo;
     private String nombreCompleto;
     private String telefono;

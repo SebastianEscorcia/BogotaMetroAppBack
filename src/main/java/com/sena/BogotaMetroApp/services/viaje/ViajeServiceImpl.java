@@ -1,5 +1,8 @@
 package com.sena.BogotaMetroApp.services.viaje;
 
+
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
+
 import com.sena.BogotaMetroApp.presentation.dto.viaje.ViajeRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.viaje.ViajeResponseDTO;
 import com.sena.BogotaMetroApp.mapper.ViajeMapper;
@@ -7,10 +10,13 @@ import com.sena.BogotaMetroApp.persistence.models.Ruta;
 import com.sena.BogotaMetroApp.persistence.models.Viaje;
 import com.sena.BogotaMetroApp.persistence.repository.RutaRepository;
 import com.sena.BogotaMetroApp.persistence.repository.ViajeRepository;
+import com.sena.BogotaMetroApp.services.exception.viaje.ViajeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ViajeServiceImpl implements IViajeServices {
@@ -50,7 +56,7 @@ public class ViajeServiceImpl implements IViajeServices {
     @Override
     public ViajeResponseDTO obtenerViaje(Long id) {
         Viaje viaje = viajeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Viaje no encontrado"));
+                .orElseThrow(() -> new ViajeException(ErrorCodeEnum.VIAJE_NOT_FOUND));
         return mapper.toDTO(viaje);
     }
 }

@@ -11,4 +11,6 @@ public interface IQrService {
     ValidarQrResponse validarQrEnTorniquete(ValidarQrRequest request);
 
     QrResponseDTO regenerarQrViaje(Long idPago);
+
+    QrResponseDTO generarQrParaViaje(Long idUsuario, Long idViaje);
 }
