@@ -14,7 +14,7 @@ public class DatosPersonales {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_datop")
-    private Integer id;
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "id_usuario", nullable = false, unique = true)

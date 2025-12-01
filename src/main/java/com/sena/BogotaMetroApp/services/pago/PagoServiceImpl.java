@@ -1,10 +1,14 @@
 package com.sena.BogotaMetroApp.services.pago;
 
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
+import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
+import com.sena.BogotaMetroApp.persistence.repository.TarjetaVirtualRepository;
 import com.sena.BogotaMetroApp.presentation.dto.pago.PagoRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.pago.PagoResponseDTO;
 import com.sena.BogotaMetroApp.mapper.pago.PagoMapper;
 import com.sena.BogotaMetroApp.persistence.models.pago.Pago;
 import com.sena.BogotaMetroApp.persistence.repository.pago.PagoRepository;
+import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +23,22 @@ public class PagoServiceImpl implements IPagoService {
 
     private final PagoMapper pagoMapper;
     private final PagoRepository pagoRepository;
+    private final TarjetaVirtualRepository tarjetaVirtualRepository;
 
     @Override
     @Transactional
-    public PagoResponseDTO registrarPago(PagoRequestDTO dto) {
-        return pagoMapper.toEntity(dto);
+    public PagoResponseDTO registrarPago(PagoRequestDTO dto ) {
+        Pago pago = pagoMapper.toEntity(dto);
+        pago.setFechaPago(LocalDateTime.now());
+
+        TarjetaVirtual tarjetaVirtual = tarjetaVirtualRepository.findByPasajeroUsuarioId(pago.getUsuario().getId()).orElseThrow(() -> new UsuarioException(ErrorCodeEnum.USUARIO_DONT_CARD_ACTIVE));
+
+        tarjetaVirtual.setSaldo(tarjetaVirtual.getSaldo().add(pago.getValorPagado()));
+        pago.setTarjetaVirtual(tarjetaVirtual);
+        tarjetaVirtualRepository.save(tarjetaVirtual);
+        Pago pagoGuardado = pagoRepository.save(pago);
+
+        return pagoMapper.toDTO(pagoGuardado);
     }
 
     @Override

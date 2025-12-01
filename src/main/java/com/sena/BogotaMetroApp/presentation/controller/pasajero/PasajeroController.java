@@ -19,10 +19,9 @@ import java.util.List;
 public class PasajeroController {
     private final IPasajeroService pasajeroService;
 
-    @PostMapping
-    public ResponseEntity<PasajeroResponseDTO> registrar(@Valid @RequestBody PasajeroRequestDTO dto, UriComponentsBuilder uriBuilder) {
-        PasajeroResponseDTO created = pasajeroService.registrar(dto);
-
+    @PostMapping("/registro")
+    public ResponseEntity<PasajeroResponseDTO> registroUnico(@Valid @RequestBody RegistroPasajeroUnificadoDTO dto, UriComponentsBuilder uriBuilder) {
+        PasajeroResponseDTO created = pasajeroService.registrarConUsuario(dto);
 
         URI location = uriBuilder.path("/api/pasajero/{id}").buildAndExpand(created.getId()).toUri();
         return ResponseEntity.created(location).body(created);
@@ -44,10 +43,5 @@ public class PasajeroController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/registro")
-    public ResponseEntity<PasajeroResponseDTO> registroUnico(
-            @RequestBody RegistroPasajeroUnificadoDTO dto
-    ) {
-        return ResponseEntity.ok(pasajeroService.registrarConUsuario(dto));
-    }
+
 }

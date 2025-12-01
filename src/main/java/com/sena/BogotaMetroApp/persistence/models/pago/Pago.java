@@ -1,4 +1,5 @@
 package com.sena.BogotaMetroApp.persistence.models.pago;
+import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 
 import com.sena.BogotaMetroApp.persistence.models.pasarela.Pasarela;
@@ -45,4 +46,8 @@ public class Pago {
 
     @Column(name = "medio_de_pago")
     private String medioDePago;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tarjetaFK", nullable = false)
+    private TarjetaVirtual tarjetaVirtual;
 }

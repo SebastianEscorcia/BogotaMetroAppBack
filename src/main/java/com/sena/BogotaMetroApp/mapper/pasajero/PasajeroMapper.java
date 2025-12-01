@@ -14,6 +14,10 @@ public class PasajeroMapper {
         dto.setCorreo(p.getUsuario().getCorreo());
 
         dto.setIdUsuario(p.getUsuario().getId());
+        if (p.getTarjetaVirtual() != null) {
+            dto.setIdTarjetaVirtual(p.getTarjetaVirtual().getIdTarjeta());
+        }
+
         dto.setCorreo(p.getUsuario().getCorreo());
 
         if (p.getUsuario().getDatosPersonales() != null) {
@@ -22,6 +26,7 @@ public class PasajeroMapper {
             dto.setTipoDocumento(p.getUsuario().getDatosPersonales().getTipoDocumento());
             dto.setNumDocumento(p.getUsuario().getDatosPersonales().getNumDocumento());
         }
+
         return dto;
     }
 
