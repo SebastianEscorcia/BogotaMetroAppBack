@@ -18,7 +18,7 @@ public class InterrupcionMapper {
         dto.setDescripcion(inter.getDescripcion());
         dto.setInicio(inter.getInicio());
         dto.setFin(inter.getFin());
-
+        dto.setEstado(inter.getEstado());
         return dto;
     }
 }

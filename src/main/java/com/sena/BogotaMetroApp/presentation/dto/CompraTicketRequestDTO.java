@@ -8,9 +8,6 @@ import lombok.Setter;
 @Setter
 public class CompraTicketRequestDTO {
 
-    @NotNull(message = "El ID del usuario es obligatorio")
-    private Long idUsuario;
-
     @NotNull(message = "El ID del viaje es obligatorio")
     private Long idViaje;
 }

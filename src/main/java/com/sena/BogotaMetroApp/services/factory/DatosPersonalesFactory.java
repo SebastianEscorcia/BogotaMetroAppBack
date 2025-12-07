@@ -2,13 +2,13 @@ package com.sena.BogotaMetroApp.services.factory;
 
 import com.sena.BogotaMetroApp.persistence.models.DatosPersonales;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
-import com.sena.BogotaMetroApp.presentation.dto.pasajero.RegistroPasajeroUnificadoDTO;
+import com.sena.BogotaMetroApp.presentation.dto.usuario.RegistroUsuarioBaseDTO;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DatosPersonalesFactory {
 
-    public DatosPersonales crearDesdeRegistro(RegistroPasajeroUnificadoDTO dto, Usuario usuario) {
+    public DatosPersonales crearDesdeRegistro(RegistroUsuarioBaseDTO dto, Usuario usuario) {
 
         DatosPersonales dp = new DatosPersonales();
         dp.setUsuario(usuario);

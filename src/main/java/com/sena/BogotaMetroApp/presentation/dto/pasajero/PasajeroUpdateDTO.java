@@ -3,7 +3,7 @@ package com.sena.BogotaMetroApp.presentation.dto.pasajero;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -13,6 +13,6 @@ public class PasajeroUpdateDTO {
     private String telefono;
     private String tipoDocumento;
     private String numDocumento;
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
     private String direccion;
 }

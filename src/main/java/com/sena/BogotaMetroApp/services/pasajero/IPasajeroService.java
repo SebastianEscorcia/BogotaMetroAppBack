@@ -8,7 +8,6 @@ import com.sena.BogotaMetroApp.presentation.dto.pasajero.RegistroPasajeroUnifica
 import java.util.List;
 
 public interface IPasajeroService {
-    PasajeroResponseDTO registrar(PasajeroRequestDTO dto);
     PasajeroResponseDTO obtener(Long id);
     List<PasajeroResponseDTO> listarTodos();
     void eliminar(Long id);

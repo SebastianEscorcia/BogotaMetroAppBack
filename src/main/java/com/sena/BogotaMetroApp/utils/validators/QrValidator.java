@@ -4,14 +4,15 @@ import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.services.exception.qr.QrException;
 import com.sena.BogotaMetroApp.persistence.models.qr.Qr;
 import com.sena.BogotaMetroApp.utils.enums.TipoQr;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
 public class QrValidator {
-    private static final int HORAS_VALIDEZ = 24;
-
+    @Value("${app.security.token-expiration}")
+    private static  int HORAS_VALIDEZ;
 
     /**
      * Valida el QR completo antes de consumirlo

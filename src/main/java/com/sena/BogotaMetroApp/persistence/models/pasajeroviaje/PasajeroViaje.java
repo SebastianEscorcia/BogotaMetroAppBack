@@ -7,6 +7,7 @@ import com.sena.BogotaMetroApp.persistence.models.qr.Qr;
 import jakarta.persistence.*;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -15,18 +16,19 @@ import java.time.LocalDateTime;
 @Table(name = "pasajeros_viajes")
 @Getter
 @Setter
+@NoArgsConstructor
 public class PasajeroViaje {
 
-    @EmbeddedId
-    private PasajeroViajeId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_ticket")
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("pasajeroId")
     @JoinColumn(name = "id_pasajero")
     private Pasajero pasajero;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("viajeId")
     @JoinColumn(name = "id_viaje")
     private Viaje viaje;
 

@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  redis-metro:
+    image: redis:alpine
+    container_name: redis-metro
+    ports:
+      - "${REDIS_PORT}:6379"
+    command:  redis-server --requirepass "${REDIS_PASSWORD}" --notify-keyspace-events Ex
+    restart: always
+    networks:
+      - metro-network
+
+
+networks:
+  metro-network:
+    driver: bridge
+
+
+volumes:
+  redis-data:
+    driver: local

@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PasajeroViajeResponseDTO {
+    private Long idTicket;
     private Long idPasajero;
     private Long idViaje;
     private String fechaRegistro;

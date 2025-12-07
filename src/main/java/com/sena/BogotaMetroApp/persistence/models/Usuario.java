@@ -25,12 +25,10 @@ public class Usuario {
     @Column(nullable = false)
     private String clave;
 
-    // RELACIÓN MUCHOS A UNO (muchos usuarios -> un rol)
     @ManyToOne
     @JoinColumn(name = "id_rol", nullable = false)
     private Role rol;
 
-    // RELACIONES 1:1 CON SUBTIPOS
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private DatosPersonales datosPersonales;
 

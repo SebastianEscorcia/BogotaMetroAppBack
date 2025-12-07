@@ -1,31 +1,35 @@
 package com.sena.BogotaMetroApp.mapper.pasajero;
 
-import com.sena.BogotaMetroApp.persistence.models.DatosPersonales;
+import com.sena.BogotaMetroApp.mapper.UsuarioMapper;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroResponseDTO;
 import com.sena.BogotaMetroApp.persistence.models.pasajero.Pasajero;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroUpdateDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class PasajeroMapper {
+
+    private final UsuarioMapper usuarioMapper;
+
     public PasajeroResponseDTO toDTO(Pasajero p) {
         PasajeroResponseDTO dto = new PasajeroResponseDTO();
         dto.setId(p.getId());
-        dto.setCorreo(p.getUsuario().getCorreo());
-
         dto.setIdUsuario(p.getUsuario().getId());
+
         if (p.getTarjetaVirtual() != null) {
             dto.setIdTarjetaVirtual(p.getTarjetaVirtual().getIdTarjeta());
         }
 
-        dto.setCorreo(p.getUsuario().getCorreo());
 
-        if (p.getUsuario().getDatosPersonales() != null) {
-            dto.setNombreCompleto(p.getUsuario().getDatosPersonales().getNombreCompleto());
-            dto.setTelefono(p.getUsuario().getDatosPersonales().getTelefono());
-            dto.setTipoDocumento(p.getUsuario().getDatosPersonales().getTipoDocumento());
-            dto.setNumDocumento(p.getUsuario().getDatosPersonales().getNumDocumento());
-        }
+        var info = usuarioMapper.toUsuarioInfo(p.getUsuario());
+
+        dto.setCorreo(info.getCorreo());
+        dto.setNombreCompleto(info.getNombreCompleto());
+        dto.setTelefono(info.getTelefono());
+        dto.setTipoDocumento(info.getTipoDocumento());
+        dto.setNumDocumento(info.getNumDocumento());
 
         return dto;
     }

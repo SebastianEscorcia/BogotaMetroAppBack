@@ -22,7 +22,7 @@ public class PasajeroViajeController {
 
     @GetMapping("/{idPasajero}/{idViaje}")
     public Object obtenerTicket(@PathVariable Long idPasajero, @PathVariable Long idViaje) {
-        return pasajeroViajeService.obtenerTicket(idPasajero, idViaje);
+        return pasajeroViajeService.obtenerTicket(idPasajero);
     }
 
     @GetMapping("/por-pasajero/{idPasajero}")
@@ -33,6 +33,11 @@ public class PasajeroViajeController {
     @GetMapping("/por-viaje/{idViaje}")
     public ResponseEntity<List<PasajeroViajeResponseDTO>> pasajerosPorViaje(@PathVariable Long idViaje) {
         return ResponseEntity.ok(pasajeroViajeService.obtenerPasajerosDeViaje(idViaje));
+    }
+
+    @GetMapping("por-pasajero-viaje/{idPasajero}/{idViaje}")
+    public ResponseEntity<List<PasajeroViajeResponseDTO>> pasajeroViaje(@PathVariable Long idPasajero, @PathVariable Long idViaje) {
+        return ResponseEntity.ok(pasajeroViajeService.obtenerTicketsDeUsuarioEnViaje(idPasajero, idViaje));
     }
 
 }

@@ -33,7 +33,6 @@ public class TarjetaVirtual {
     private LocalDate fechaCreacion;
 
     // RELACIÓN: Una tarjeta le pertenece a un pasajero.
-    // Usamos OneToOne si el pasajero solo puede tener UNA tarjeta virtual (lo más común).
     @OneToOne
     @JoinColumn(name = "id_pasajeroFK", nullable = false, unique = true)
     private Pasajero pasajero;

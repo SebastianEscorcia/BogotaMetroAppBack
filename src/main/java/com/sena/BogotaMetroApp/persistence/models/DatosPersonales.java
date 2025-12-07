@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "datos_personales")
@@ -24,6 +24,6 @@ public class DatosPersonales {
     private String telefono;
     private String tipoDocumento;
     private String numDocumento;
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
     private String direccion;
 }

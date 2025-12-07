@@ -6,7 +6,9 @@ import java.util.List;
 public interface IPasajeroViajeService {
     PasajeroViajeResponseDTO registrarViaje(PasajeroViajeRequestDTO dto);
 
-    PasajeroViajeResponseDTO obtenerTicket(Long idPasajero, Long idViaje);
+    PasajeroViajeResponseDTO obtenerTicket(Long idTicket);
+
+    List<PasajeroViajeResponseDTO> obtenerTicketsDeUsuarioEnViaje(Long idPasajero, Long idViaje);
 
     List<PasajeroViajeResponseDTO> obtenerViajesPorPasajero(Long idPasajero);
 

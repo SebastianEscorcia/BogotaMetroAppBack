@@ -2,7 +2,9 @@ package com.sena.BogotaMetroApp.persistence.models.pasajeroviaje;
 
 import jakarta.persistence.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -11,6 +13,8 @@ import java.util.Objects;
 @Embeddable
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PasajeroViajeId implements Serializable {
 
     @Column(name = "id_pasajero")
@@ -18,13 +22,6 @@ public class PasajeroViajeId implements Serializable {
 
     @Column(name = "id_viaje")
     private Long viajeId;
-
-    public PasajeroViajeId() {}
-
-    public PasajeroViajeId(Long pasajeroId, Long viajeId) {
-        this.pasajeroId = pasajeroId;
-        this.viajeId = viajeId;
-    }
 
     @Override
     public boolean equals(Object o) {

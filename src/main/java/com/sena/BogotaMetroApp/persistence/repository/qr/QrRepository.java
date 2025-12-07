@@ -22,10 +22,10 @@ public interface QrRepository extends JpaRepository<Qr, Long> {
     @Query("SELECT q FROM Qr q JOIN FETCH q.usuario WHERE q.contenidoQr = :contenido")
     Optional<Qr> findByContenidoQrWithUsuario(@Param("contenido") String contenido);
 
-    List<Qr> findByPagoIdAndTipo(Long idPago, TipoQr tipo);
+    List<Qr> findByTransaccionIdAndTipo(Long idTransaccion, TipoQr tipo);
 
-    @Query("SELECT q FROM Qr q WHERE q.pago.id = :idPago AND q.tipo = 'VIAJE' ORDER BY q.fechaGeneracion DESC")
-    List<Qr> findQrsByPagoOrderByFechaDesc(@Param("idPago") Long idPago);
+    @Query("SELECT q FROM Qr q WHERE q.transaccion.id = :idTransaccion AND q.tipo = 'VIAJE' ORDER BY q.fechaGeneracion DESC")
+    List<Qr> findQrsByTransaccionOrderByFechaDesc(@Param("idTransaccion") Long idTransaccion);
 
     List<Qr> findByUsuarioId(Long usuarioId);
 

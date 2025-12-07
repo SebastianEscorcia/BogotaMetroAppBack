@@ -3,7 +3,7 @@ package com.sena.BogotaMetroApp.services.factory;
 import com.sena.BogotaMetroApp.persistence.models.Role;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.repository.RoleRepository;
-import com.sena.BogotaMetroApp.presentation.dto.pasajero.RegistroPasajeroUnificadoDTO;
+import com.sena.BogotaMetroApp.presentation.dto.usuario.RegistroUsuarioBaseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -15,18 +15,16 @@ public class UsuarioFactory {
     private final BCryptPasswordEncoder encoder;
     private final RoleRepository roleRepository;
 
-    public Usuario crearDesdeRegistro(RegistroPasajeroUnificadoDTO dto) {
+    public Usuario crearDesdeRegistro(RegistroUsuarioBaseDTO dto, String nombreRol) {
 
         Usuario usuario = new Usuario();
         usuario.setCorreo(dto.getCorreo());
         usuario.setClave(encoder.encode(dto.getClave()));
 
-        Role rolPasajero = roleRepository.findByNombre("PASAJERO").isPresent() ? roleRepository.findByNombre("PASAJERO").get() : null;
-        if(rolPasajero == null){
-            throw new RuntimeException("Rol de pasajero no existe");
-        }
+        Role rol = roleRepository.findByNombre(nombreRol ).orElseThrow(() -> new RuntimeException("El rol '" + nombreRol + "' no existe en el sistema"));
 
-        usuario.setRol(rolPasajero);
+
+        usuario.setRol(rol);
 
         return usuario;
     }

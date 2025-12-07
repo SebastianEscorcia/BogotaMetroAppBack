@@ -2,7 +2,7 @@ package com.sena.BogotaMetroApp.persistence.models.qr;
 
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.models.Viaje;
-import com.sena.BogotaMetroApp.persistence.models.pago.Pago;
+import com.sena.BogotaMetroApp.persistence.models.transaccion.Transaccion;
 import com.sena.BogotaMetroApp.persistence.models.pasajeroviaje.PasajeroViaje;
 import com.sena.BogotaMetroApp.utils.enums.TipoQr;
 import jakarta.persistence.*;
@@ -40,8 +40,8 @@ public class Qr {
     private PasajeroViaje pasajeroViaje;
 
     @ManyToOne
-    @JoinColumn(name = "id_pagoFK")
-    private Pago pago;
+    @JoinColumn(name = "id_transaccion_fk")
+    private Transaccion transaccion;
 
     @ManyToOne
     @JoinColumn(name = "id_viajeFK")

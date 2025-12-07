@@ -5,7 +5,6 @@ import com.sena.BogotaMetroApp.persistence.models.DatosPersonales;
 import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
 import com.sena.BogotaMetroApp.persistence.repository.DatosPersonalesRepository;
 import com.sena.BogotaMetroApp.persistence.repository.TarjetaVirtualRepository;
-import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroResponseDTO;
 import com.sena.BogotaMetroApp.mapper.pasajero.PasajeroMapper;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
@@ -41,31 +40,36 @@ public class PasajeroServiceImpl implements IPasajeroService {
 
     @Override
     @Transactional
-    public PasajeroResponseDTO registrar(PasajeroRequestDTO dto) {
-        Usuario user = usuarioRepository.findById(dto.getIdUsuario())
-                .orElseThrow(() -> new PasajeroException(ErrorCodeEnum.PASAJERO_USUARIO_NO_EXISTE));
+    public PasajeroResponseDTO registrarConUsuario(RegistroPasajeroUnificadoDTO dto) {
+        usuarioRepository.findByCorreo(dto.getCorreo())
+                .ifPresent(u -> {
+                    throw new PasajeroException(ErrorCodeEnum.PASAJERO_YA_EXISTE);
+                });
 
+        Usuario usuario = usuarioFactory.crearDesdeRegistro(dto, "PASAJERO");
+        usuario = usuarioRepository.save(usuario);
 
-        if (user.getPasajero() != null) {
-            throw new PasajeroException(ErrorCodeEnum.PASAJERO_YA_EXISTE);
-        }
+        DatosPersonales dp = datosPersonalesFactory.crearDesdeRegistro(dto, usuario);
+        usuario.setDatosPersonales(dp);
+        datosPersonalesRepository.save(dp);
 
-        Pasajero pasajero = new Pasajero();
-        pasajero.setUsuario(user);
-        pasajero.setId(user.getId());
+        Pasajero pasajero = pasajeroFactory.crear(usuario);
+        pasajero.setId(usuario.getId());
+        pasajero = pasajeroRepository.save(pasajero);
+        usuario.setPasajero(pasajero);
+
 
         TarjetaVirtual nuevaTarjeta = new TarjetaVirtual();
         nuevaTarjeta.setSaldo(BigDecimal.ZERO);
         nuevaTarjeta.setEstado("ACTIVA");
         nuevaTarjeta.setNumeroTarjeta(TarjetaUtil.generarNumeroTarjeta());
         nuevaTarjeta.setPasajero(pasajero);
+
+
+        tarjetaVirtualRepository.save(nuevaTarjeta);
         pasajero.setTarjetaVirtual(nuevaTarjeta);
 
-        user.setPasajero(pasajero);
-        tarjetaVirtualRepository.save(nuevaTarjeta);
-        pasajeroRepository.save(pasajero);
-        usuarioRepository.save(user);
-
+        // Respuesta
         return mapper.toDTO(pasajero);
     }
 
@@ -106,41 +110,6 @@ public class PasajeroServiceImpl implements IPasajeroService {
 
         pasajeroRepository.save(pasajero);
 
-        return mapper.toDTO(pasajero);
-    }
-
-    @Override
-    public PasajeroResponseDTO registrarConUsuario(RegistroPasajeroUnificadoDTO dto) {
-        usuarioRepository.findByCorreo(dto.getCorreo())
-                .ifPresent(u -> {
-                    throw new PasajeroException(ErrorCodeEnum.PASAJERO_YA_EXISTE);
-                });
-
-        // Crear objetos con factories
-        Usuario usuario = usuarioFactory.crearDesdeRegistro(dto);
-        usuario = usuarioRepository.save(usuario);
-
-        DatosPersonales dp = datosPersonalesFactory.crearDesdeRegistro(dto, usuario);
-        usuario.setDatosPersonales(dp);
-        datosPersonalesRepository.save(dp);
-
-        Pasajero pasajero = pasajeroFactory.crear(usuario);
-        pasajero.setId(usuario.getId());
-        pasajero = pasajeroRepository.save(pasajero);
-        usuario.setPasajero(pasajero);
-
-
-        TarjetaVirtual nuevaTarjeta = new TarjetaVirtual();
-        nuevaTarjeta.setSaldo(BigDecimal.ZERO);
-        nuevaTarjeta.setEstado("ACTIVA");
-        nuevaTarjeta.setNumeroTarjeta(TarjetaUtil.generarNumeroTarjeta());
-        nuevaTarjeta.setPasajero(pasajero);
-
-
-        tarjetaVirtualRepository.save(nuevaTarjeta);
-        pasajero.setTarjetaVirtual(nuevaTarjeta);
-
-        // Respuesta
         return mapper.toDTO(pasajero);
     }
 

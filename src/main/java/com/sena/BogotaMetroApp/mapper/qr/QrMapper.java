@@ -8,11 +8,11 @@ import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import com.sena.BogotaMetroApp.services.exception.viaje.ViajeException;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.models.Viaje;
-import com.sena.BogotaMetroApp.persistence.models.pago.Pago;
+import com.sena.BogotaMetroApp.persistence.models.transaccion.Transaccion;
 import com.sena.BogotaMetroApp.persistence.models.qr.Qr;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.persistence.repository.ViajeRepository;
-import com.sena.BogotaMetroApp.persistence.repository.pago.PagoRepository;
+import com.sena.BogotaMetroApp.persistence.repository.transaccion.TransaccionRepository;
 import com.sena.BogotaMetroApp.utils.enums.TipoQr;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,7 +26,7 @@ public class QrMapper {
 
     private final UsuarioRepository usuarioRepository;
     private final ViajeRepository viajeRepository;
-    private final PagoRepository pagoRepository;
+    private final TransaccionRepository transaccionRepository;
 
     /**
      * Convierte QrRequestDTO a entidad Qr (SIN PERSISTIR)
@@ -40,7 +40,7 @@ public class QrMapper {
         qr.setUsuario(usuario);
         qr.setFechaGeneracion(LocalDateTime.now());
         qr.setConsumido(false);
-        qr.setContenidoQr(generarContenidoQr(dto, usuario));
+        qr.setContenidoQr(generarContenidoDesdeDTO(dto, usuario));
 
         asignarRelaciones(qr, dto);
 
@@ -60,15 +60,14 @@ public class QrMapper {
     }
 
 
-
     /**
      * Asigna las relaciones de pago o viaje según el tipo de QR
      */
     private void asignarRelaciones(Qr qr, QrRequestDTO dto) {
         if (dto.getTipo() == TipoQr.PAGO && dto.getIdPago() != null) {
-            Pago pago = pagoRepository.findById(dto.getIdPago())
+            Transaccion transaccion = transaccionRepository.findById(dto.getIdPago())
                     .orElseThrow(() -> new PagoException(ErrorCodeEnum.PAGO_NOT_FOUND));
-            qr.setPago(pago);
+            qr.setTransaccion(transaccion);
         }
 
         if (dto.getTipo() == TipoQr.VIAJE && dto.getIdViaje() != null) {
@@ -81,15 +80,22 @@ public class QrMapper {
     /**
      * Genera el contenido único del QR
      */
-    private String generarContenidoQr(QrRequestDTO dto, Usuario usuario) {
+    public String generarContenidoQr(TipoQr tipo, Long idUsuario, Long idReferencia) {
         String uuid = UUID.randomUUID().toString();
         String timestamp = String.valueOf(System.currentTimeMillis());
 
-        return switch (dto.getTipo()) {
+        return switch (tipo) {
             case PAGO -> String.format("PAGO:%d:%d:%s:%s",
-                    usuario.getId(), dto.getIdPago(), uuid, timestamp);
+                    idUsuario, idReferencia, uuid, timestamp);
             case VIAJE -> String.format("VIAJE:%d:%d:%s:%s",
-                    usuario.getId(), dto.getIdViaje(), uuid, timestamp);
+                    idUsuario, idReferencia, uuid, timestamp);
         };
     }
+
+    private String generarContenidoDesdeDTO(QrRequestDTO dto, Usuario usuario) {
+        Long idReferencia = (dto.getTipo() == TipoQr.PAGO) ? dto.getIdPago() : dto.getIdViaje();
+        return generarContenidoQr(dto.getTipo(), usuario.getId(), idReferencia);
+    }
+
+
 }

@@ -26,7 +26,7 @@ public enum ErrorCodeEnum implements ErrorCode {
     USUARIO_NOT_FOUND("USUARIO_NOT_FOUND", "Usuario no encontrado en  el sistema"),
     USUARIO_INACTIVO("USUARIO_INACTIVO", "El usuario está inactivo"),
     USUARIO_DONT_CARD_ACTIVE("USUARIO_SIN_TARJETA" , "El usuario no tiene una tarjeta virtual activa"),
-
+    USUARIO_YA_EXISTE("USER-409", "El usuario ya existe"),
     // Pasajero Errors
     PASAJERO_USUARIO_NO_EXISTE("PAS-404", "El usuario no existe"),
     PASAJERO_YA_EXISTE("PAS-409", "El usuario ya está registrado "),
