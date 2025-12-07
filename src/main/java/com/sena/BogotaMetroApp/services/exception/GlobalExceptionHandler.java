@@ -2,6 +2,7 @@ package com.sena.BogotaMetroApp.services.exception;
 
 
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
+import com.sena.BogotaMetroApp.services.exception.chat.ChatException;
 import com.sena.BogotaMetroApp.services.exception.pago.PagoException;
 import com.sena.BogotaMetroApp.services.exception.pasajero.PasajeroException;
 import com.sena.BogotaMetroApp.services.exception.qr.QrException;
@@ -42,6 +43,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getCode(), ex.getDescription(), HttpStatus.NOT_FOUND);
     }
 
+    /* --- Excepciones de Chat --- */
+
+    @ExceptionHandler(ChatException.class)
+    public ResponseEntity<ErrorResponse> handleChatException(ChatException ex) {
+        log.warn("Error Chat: {}", ex.getDescription());
+        return buildErrorResponse(ex.getCode(), ex.getDescription(), HttpStatus.BAD_REQUEST);
+    }
+
     /* --- Validación con @Valid en DTOs --- */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
@@ -78,6 +87,8 @@ public class GlobalExceptionHandler {
         );
     }
 
+
+
     /* --- Cualquier error inesperado --- */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
@@ -100,5 +111,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(error, status);
     }
+
+
 
 }

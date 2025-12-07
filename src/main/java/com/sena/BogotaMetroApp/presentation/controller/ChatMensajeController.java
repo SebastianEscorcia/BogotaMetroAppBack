@@ -3,6 +3,7 @@ package com.sena.BogotaMetroApp.presentation.controller;
 import com.sena.BogotaMetroApp.presentation.dto.MensajeDTO;
 import com.sena.BogotaMetroApp.services.ChatNotificationService;
 import com.sena.BogotaMetroApp.services.chatmensaje.IChatMensajeService;
+import com.sena.BogotaMetroApp.services.exception.chat.ChatException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -25,10 +26,13 @@ public class ChatMensajeController {
         try {
             MensajeDTO mensajeGuardado = chatMensajeService.procesarYGuardarMensaje(idSesion, mensajeDTO);
 
-           chatNotificationService.sendNewNotificationMessage(idSesion, mensajeGuardado);
+            chatNotificationService.sendNewNotificationMessage(idSesion, mensajeGuardado);
 
-        } catch (RuntimeException e) {
-            chatNotificationService.notificarError(idSesion, e.getMessage());
+        } catch (ChatException e) {
+
+            chatNotificationService.notificarError(idSesion, e.getDescription());
+        } catch (Exception e) {
+            chatNotificationService.notificarError(idSesion, "Ocurrió un error inesperado al procesar el mensaje.");
         }
 
     }

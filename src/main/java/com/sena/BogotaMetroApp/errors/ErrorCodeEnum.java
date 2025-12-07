@@ -46,7 +46,15 @@ public enum ErrorCodeEnum implements ErrorCode {
     INTERNAL_ERROR("INTERNAL_ERROR", "Error interno del servidor"),
     VALIDATION_ERROR("VALIDATION_ERROR", "Error de validación de datos"),
     UNAUTHORIZED("UNAUTHORIZED", "No tiene autorización para realizar esta acción"),
-    FORBIDDEN("FORBIDDEN", "Acceso denegado");
+    FORBIDDEN("FORBIDDEN", "Acceso denegado"),
+
+    // Chats Errors
+
+    CHAT_SESION_NOT_FOUND("CHAT_NOT_FOUND", "La sesión de chat no existe"),
+    CHAT_CERRADO("CHAT_CLOSED", "No se pueden enviar mensajes a una sesión cerrada"),
+    CHAT_ACCESO_DENEGADO("CHAT_FORBIDDEN", "Acceso denegado: Usted no es un participante activo de este chat"),
+    CHAT_REMITENTE_NOT_FOUND("CHAT_USER_NOT_FOUND", "El usuario remitente no existe"),
+    CHAT_SOPORTE_INVALIDO("CHAT_SUPPORT_INVALID", "El usuario asignado no tiene rol de SOPORTE");
 
     private final String code;
     private final String description;
