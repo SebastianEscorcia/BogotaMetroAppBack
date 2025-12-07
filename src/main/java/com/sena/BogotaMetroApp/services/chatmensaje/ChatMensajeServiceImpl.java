@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.services.chatmensaje;
 
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.externalservices.ChatRedisService;
 import com.sena.BogotaMetroApp.persistence.models.Mensaje;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
@@ -9,6 +10,7 @@ import com.sena.BogotaMetroApp.persistence.repository.ParticipanteSesionReposito
 import com.sena.BogotaMetroApp.persistence.repository.SesionChatRepository;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.presentation.dto.MensajeDTO;
+import com.sena.BogotaMetroApp.services.exception.chat.ChatException;
 import com.sena.BogotaMetroApp.utils.enums.EstadoSesionEnum;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +33,14 @@ public class ChatMensajeServiceImpl implements IChatMensajeService {
     public MensajeDTO procesarYGuardarMensaje(Long idSesion, MensajeDTO mensajeDTO) {
 
         SesionChat sesion = sesionChatRepository.findById(idSesion)
-                .orElseThrow(() -> new RuntimeException("La sesión de chat no existe."));
+                .orElseThrow(() -> new ChatException(ErrorCodeEnum.CHAT_SESION_NOT_FOUND));
 
         Usuario remitente = usuarioRepository.findById(mensajeDTO.getRemitenteId())
-                .orElseThrow(() -> new RuntimeException("El usuario remitente no existe."));
+                .orElseThrow(() -> new ChatException(ErrorCodeEnum.CHAT_REMITENTE_NOT_FOUND));
 
         validarReglasDeNegocio(sesion, remitente);
 
-        // 3. Mapeo y Persistencia
+
         Mensaje mensaje = new Mensaje();
         mensaje.setContenido(mensajeDTO.getContenido());
         mensaje.setFechaEnvio(LocalDateTime.now());
@@ -62,14 +64,14 @@ public class ChatMensajeServiceImpl implements IChatMensajeService {
     private void validarReglasDeNegocio(SesionChat sesion, Usuario remitente) {
         // Regla 1: Chat Cerrado
         if (sesion.getEstado() == EstadoSesionEnum.CERRADO) {
-            throw new RuntimeException("No se pueden enviar mensajes a una sesión cerrada.");
+            throw new ChatException(ErrorCodeEnum.CHAT_CERRADO);
         }
 
         boolean esParticipante = participanteRepository
                 .existsBySesionChatIdAndUsuarioIdAndActivoTrue(sesion.getId(), remitente.getId());
 
         if(!esParticipante) {
-            throw new RuntimeException("Acceso denegado: Usted no es un participante activo de este chat.");
+            throw new ChatException(ErrorCodeEnum.CHAT_ACCESO_DENEGADO);
         }
     }
 

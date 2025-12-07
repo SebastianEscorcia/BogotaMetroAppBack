@@ -56,7 +56,6 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
     }
 
     @Override
-    @Transactional
     public List<InterrupcionResponseDTO> listar() {
         return repository.findByActivoTrue().stream().map(mapper::toDTO).toList();
     }

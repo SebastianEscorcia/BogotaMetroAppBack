@@ -37,9 +37,6 @@ public interface SesionChatRepository extends JpaRepository<SesionChat, Long> {
             "WHERE p.usuario.id = :idUsuario")
     List<SesionChat> findHistorialPorUsuario(@Param("idUsuario") Long idUsuario);
 
-    // Buscar sesiones ACTIVAS cuya última actividad fue ANTES de la fecha límite
-    @Query("SELECT s FROM SesionChat s WHERE s.estado = 'ACTIVO' AND s.fechaUltimaActividad < :fechaLimite")
-    List<SesionChat> buscarSesionesInactivas(@Param("fechaLimite") LocalDateTime fechaLimite);
 }
 
 
