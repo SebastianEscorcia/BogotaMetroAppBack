@@ -14,4 +14,6 @@ public interface IPasajeroService {
     PasajeroResponseDTO actualizar(Long id, PasajeroUpdateDTO dto);
 
     PasajeroResponseDTO registrarConUsuario(RegistroPasajeroUnificadoDTO dto);
+
+    PasajeroResponseDTO obtenerPorCorreo(String correo);
 }

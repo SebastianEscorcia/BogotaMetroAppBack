@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models.estacion;
 
+import com.sena.BogotaMetroApp.persistence.models.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 @Table(name = "estaciones")
 @Getter
 @Setter
-public class Estacion {
+public class Estacion extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

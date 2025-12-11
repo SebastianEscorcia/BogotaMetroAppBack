@@ -7,6 +7,9 @@ import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.presentation.dto.soporte.SoporteRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.soporte.SoporteResponseDTO;
 import com.sena.BogotaMetroApp.persistence.models.soporte.Soporte;
+import com.sena.BogotaMetroApp.services.factory.DatosPersonalesFactory;
+import com.sena.BogotaMetroApp.services.factory.UsuarioFactory;
+import com.sena.BogotaMetroApp.utils.enums.RoleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,33 +21,30 @@ public class SoporteMapper {
 
     private final UsuarioMapper usuarioMapper;
 
-    public Soporte toEntity(SoporteRequestDTO  dto, String claveEncriptada, Role rol){
-        Usuario usuario = new Usuario();
-        usuario.setCorreo(dto.getCorreo());
-        usuario.setClave(claveEncriptada);
-        usuario.setRol(rol);
-        DatosPersonales datosP = new DatosPersonales();
-        datosP.setNombreCompleto(dto.getNombreCompleto());
-        datosP.setTelefono(dto.getTelefono());
-        datosP.setTipoDocumento(dto.getTipoDocumento());
-        datosP.setNumDocumento(dto.getNumDocumento());
-        datosP.setFechaNacimiento(dto.getFechaNacimiento());
-        datosP.setDireccion(dto.getDireccion());
+    private final UsuarioFactory usuarioFactory;
+    private final DatosPersonalesFactory datosPersonalesFactory;
 
-        datosP.setUsuario(usuario);
-        usuario.setDatosPersonales(datosP);
+    public Soporte toEntity(SoporteRequestDTO dto, String claveEncriptada, Role rol) {
+
+
+        Usuario usuario = usuarioFactory.crearDesdeRegistro(dto, RoleEnum.SOPORTE.toString());
+
+        DatosPersonales dp = datosPersonalesFactory.crearDesdeRegistro(dto, usuario);
+        usuario.setDatosPersonales(dp);
 
         Soporte soporte = new Soporte();
-        soporte.setEstado(dto.getEstado());
+        soporte.setEstado(dto.getEstado() != null ? dto.getEstado() : 1);
         soporte.setFechaCreacion(LocalDateTime.now());
         soporte.setUltimoAcceso(LocalDateTime.now());
+
         soporte.setUsuario(usuario);
         usuario.setSoporte(soporte);
 
-        return  soporte;
+        return soporte;
 
 
     }
+
     public SoporteResponseDTO toDTO(Soporte s) {
         SoporteResponseDTO dto = new SoporteResponseDTO();
         dto.setId(s.getId());

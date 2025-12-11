@@ -3,8 +3,6 @@ package com.sena.BogotaMetroApp.services.pasajero;
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.persistence.models.DatosPersonales;
 import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
-import com.sena.BogotaMetroApp.persistence.repository.DatosPersonalesRepository;
-import com.sena.BogotaMetroApp.persistence.repository.TarjetaVirtualRepository;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroResponseDTO;
 import com.sena.BogotaMetroApp.mapper.pasajero.PasajeroMapper;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
@@ -16,13 +14,14 @@ import com.sena.BogotaMetroApp.presentation.dto.pasajero.RegistroPasajeroUnifica
 import com.sena.BogotaMetroApp.services.exception.pasajero.PasajeroException;
 import com.sena.BogotaMetroApp.services.factory.DatosPersonalesFactory;
 import com.sena.BogotaMetroApp.services.factory.PasajeroFactory;
+import com.sena.BogotaMetroApp.services.factory.TarjetaVirtualFactory;
 import com.sena.BogotaMetroApp.services.factory.UsuarioFactory;
-import com.sena.BogotaMetroApp.utils.logic.TarjetaUtil;
+import com.sena.BogotaMetroApp.utils.enums.RoleEnum;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,10 +31,9 @@ public class PasajeroServiceImpl implements IPasajeroService {
     private final PasajeroRepository pasajeroRepository;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioFactory usuarioFactory;
-    private final DatosPersonalesRepository datosPersonalesRepository;
     private final DatosPersonalesFactory datosPersonalesFactory;
-    private final TarjetaVirtualRepository tarjetaVirtualRepository;
     private final PasajeroFactory pasajeroFactory;
+    private final TarjetaVirtualFactory tarjetaVirtualFactory;
     private final PasajeroMapper mapper;
 
     @Override
@@ -46,31 +44,35 @@ public class PasajeroServiceImpl implements IPasajeroService {
                     throw new PasajeroException(ErrorCodeEnum.PASAJERO_YA_EXISTE);
                 });
 
-        Usuario usuario = usuarioFactory.crearDesdeRegistro(dto, "PASAJERO");
-        usuario = usuarioRepository.save(usuario);
+        //El cascade = CascadeType.ALL hace que cuando guarde al usuario, TODO se guarde automáticamente.
+        Usuario usuario = usuarioFactory.crearDesdeRegistro(dto, RoleEnum.PASAJERO.toString());
 
         DatosPersonales dp = datosPersonalesFactory.crearDesdeRegistro(dto, usuario);
         usuario.setDatosPersonales(dp);
-        datosPersonalesRepository.save(dp);
+
 
         Pasajero pasajero = pasajeroFactory.crear(usuario);
-        pasajero.setId(usuario.getId());
-        pasajero = pasajeroRepository.save(pasajero);
         usuario.setPasajero(pasajero);
 
 
-        TarjetaVirtual nuevaTarjeta = new TarjetaVirtual();
-        nuevaTarjeta.setSaldo(BigDecimal.ZERO);
-        nuevaTarjeta.setEstado("ACTIVA");
-        nuevaTarjeta.setNumeroTarjeta(TarjetaUtil.generarNumeroTarjeta());
-        nuevaTarjeta.setPasajero(pasajero);
-
-
-        tarjetaVirtualRepository.save(nuevaTarjeta);
+        TarjetaVirtual nuevaTarjeta = tarjetaVirtualFactory.crearTarjetaVirtual(pasajero);
         pasajero.setTarjetaVirtual(nuevaTarjeta);
 
-        // Respuesta
-        return mapper.toDTO(pasajero);
+        usuario = usuarioRepository.save(usuario);
+
+        return mapper.toDTO(usuario.getPasajero());
+    }
+
+    @Override
+    public PasajeroResponseDTO obtenerPorCorreo(String correo) {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el correo: " + correo));
+
+        if (usuario.getPasajero() == null) {
+            throw new PasajeroException(ErrorCodeEnum.PASAJERO_NO_ENCONTRADO);
+        }
+
+        return mapper.toDTO(usuario.getPasajero());
     }
 
     @Override

@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * Servicio que implementa los notifiers para enviar notificaciones a través de WebSocket.
+ */
 @Service
 @RequiredArgsConstructor
 public class WebSocketNotificationHub implements IBroadcastNotifier, IGroupNotifier, IUserNotifier {

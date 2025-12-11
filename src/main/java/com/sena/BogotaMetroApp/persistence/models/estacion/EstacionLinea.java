@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "estaciones_lineas")
 @Getter
 @Setter
 @NoArgsConstructor

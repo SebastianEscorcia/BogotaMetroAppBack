@@ -32,19 +32,23 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authHeader.substring(7);
-        String correo = jwtService.extraerCorreo(token);
+        try {
+            String token = authHeader.substring(7);
+            String correo = jwtService.extraerCorreo(token);
 
-        Usuario usuario = usuarioRepository.findByCorreo(correo).orElse(null);
-
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(
-                        usuario,
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()))
-                );
-
-        SecurityContextHolder.getContext().setAuthentication(auth);
+            if (correo != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                usuarioRepository.findByCorreo(correo).ifPresent(usuario -> {
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            usuario,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()))
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                });
+            }
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+        }
         filterChain.doFilter(request, response);
     }
 }

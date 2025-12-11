@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models.conexion;
 
+import com.sena.BogotaMetroApp.persistence.models.AuditableEntity;
 import com.sena.BogotaMetroApp.persistence.models.estacion.Estacion;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Table(name = "conexiones")
 @Getter
 @Setter
-public class Conexion {
+public class Conexion extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

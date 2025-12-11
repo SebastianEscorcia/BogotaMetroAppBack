@@ -16,6 +16,7 @@ public class PuntoInteresMapper {
         PuntoInteres p = new PuntoInteres();
         p.setEstacion(estacionRepository.findById(dto.getIdEstacion()).orElseThrow());
         p.setNombre(dto.getNombre());
+        p.setDescripcion(dto.getDescripcion());
         p.setCategoria(dto.getCategoria());
         p.setLatitud(dto.getLatitud());
         p.setLongitud(dto.getLongitud());
@@ -27,6 +28,7 @@ public class PuntoInteresMapper {
         dto.setId(p.getId());
         dto.setIdEstacion(p.getEstacion().getId());
         dto.setNombre(p.getNombre());
+        dto.setDescripcion(p.getDescripcion());
         dto.setCategoria(p.getCategoria());
         dto.setLatitud(p.getLatitud());
         dto.setLongitud(p.getLongitud());

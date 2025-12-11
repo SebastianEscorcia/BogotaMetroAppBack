@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models.puntointeres;
 
+import com.sena.BogotaMetroApp.persistence.models.AuditableEntity;
 import com.sena.BogotaMetroApp.persistence.models.estacion.Estacion;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "puntos_interes")
 @Getter @Setter
-public class PuntoInteres {
+public class PuntoInteres extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +21,7 @@ public class PuntoInteres {
     @ManyToOne
     @JoinColumn(name = "id_estacion", nullable = false)
     private Estacion estacion;
-
+    private String descripcion;
     private String nombre;
 
     private String categoria;

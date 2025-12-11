@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.services.ruta;
 
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.presentation.dto.ruta.RutaRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.ruta.RutaResponseDTO;
 import com.sena.BogotaMetroApp.mapper.RutaMapper;
@@ -7,6 +8,7 @@ import com.sena.BogotaMetroApp.persistence.models.estacion.Estacion;
 import com.sena.BogotaMetroApp.persistence.models.Ruta;
 import com.sena.BogotaMetroApp.persistence.repository.estacion.EstacionRepository;
 import com.sena.BogotaMetroApp.persistence.repository.RutaRepository;
+import com.sena.BogotaMetroApp.services.exception.ruta.RutaException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +23,26 @@ public class RutaServicesImpl implements IRutaServices {
 
     @Override
     public RutaResponseDTO crear(RutaRequestDTO dto) {
+
+        if (dto.getEstacionInicioId() == null || dto.getEstacionFinId() == null) {
+            throw new RutaException(ErrorCodeEnum.RUTA_ESTACION_REQ);
+        }
+
         Ruta ruta = new Ruta();
 
         ruta.setDistancia(dto.getDistancia());
-        ruta.setHoraInicioRuta(dto.getHoraInicioRuta());
+        try {
+            ruta.setHoraInicioRuta(dto.getHoraInicioRuta());
+        } catch (Exception e) {
+            throw new RutaException(ErrorCodeEnum.RUTA_HORA_FORMATO_INVALIDO);
+        }
         ruta.setFecha(dto.getFecha());
 
         Estacion inicio = estacionRepository.findById(dto.getEstacionInicioId())
-                .orElseThrow(() -> new RuntimeException("Estación inicio no encontrada"));
+                .orElseThrow(() -> new RutaException(ErrorCodeEnum.RUTA_ESTACION_NOT_FOUND));
 
         Estacion fin = estacionRepository.findById(dto.getEstacionFinId())
-                .orElseThrow(() -> new RuntimeException("Estación fin no encontrada"));
+                .orElseThrow(() -> new RutaException(ErrorCodeEnum.RUTA_ESTACION_NOT_FOUND));
 
         ruta.setEstacionInicio(inicio);
         ruta.setEstacionFin(fin);
@@ -44,13 +55,14 @@ public class RutaServicesImpl implements IRutaServices {
     @Override
     public RutaResponseDTO obtener(Long id) {
         Ruta ruta = rutaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ruta no encontrada"));
+                .orElseThrow(() -> new RutaException(ErrorCodeEnum.RUTA_NOT_FOUND));
+        if(!ruta.isActivo()) throw new RutaException(ErrorCodeEnum.RUTA_NOT_FOUND);
         return rutaMapper.toDTO(ruta);
     }
 
     @Override
     public List<RutaResponseDTO> listar() {
-        return rutaRepository.findAll().stream()
+        return rutaRepository.findByActivoTrue().stream()
                 .map(rutaMapper::toDTO)
                 .toList();
     }
@@ -58,17 +70,21 @@ public class RutaServicesImpl implements IRutaServices {
     @Override
     public RutaResponseDTO actualizar(Long id, RutaRequestDTO dto) {
         Ruta ruta = rutaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ruta no encontrada"));
+                .orElseThrow(() -> new RutaException(ErrorCodeEnum.RUTA_NOT_FOUND));
+
+        if (dto.getEstacionInicioId() == null || dto.getEstacionFinId() == null) {
+            throw new RutaException(ErrorCodeEnum.RUTA_ESTACION_REQ);
+        }
 
         ruta.setDistancia(dto.getDistancia());
         ruta.setHoraInicioRuta(dto.getHoraInicioRuta());
         ruta.setFecha(dto.getFecha());
 
         Estacion inicio = estacionRepository.findById(dto.getEstacionInicioId())
-                .orElseThrow(() -> new RuntimeException("Estación inicio no encontrada"));
+                .orElseThrow(() -> new RutaException(ErrorCodeEnum.RUTA_ESTACION_NOT_FOUND));
 
         Estacion fin = estacionRepository.findById(dto.getEstacionFinId())
-                .orElseThrow(() -> new RuntimeException("Estación fin no encontrada"));
+                .orElseThrow(() -> new RutaException(ErrorCodeEnum.RUTA_ESTACION_NOT_FOUND));
 
         ruta.setEstacionInicio(inicio);
         ruta.setEstacionFin(fin);
@@ -78,6 +94,10 @@ public class RutaServicesImpl implements IRutaServices {
 
     @Override
     public void eliminar(Long id) {
-        rutaRepository.deleteById(id);
+        Ruta ruta = rutaRepository.findById(id)
+                .orElseThrow(() -> new RutaException(ErrorCodeEnum.RUTA_NOT_FOUND));
+        ruta.setActivo(false);
+
+        rutaRepository.save(ruta);
     }
 }

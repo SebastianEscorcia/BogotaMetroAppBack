@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.services.interrupcion;
 
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionResponseDTO;
 import com.sena.BogotaMetroApp.mapper.InterrupcionMapper;
@@ -10,6 +11,7 @@ import com.sena.BogotaMetroApp.persistence.repository.estacion.EstacionRepositor
 import com.sena.BogotaMetroApp.persistence.repository.interrupcion.InterrupcionRepository;
 import com.sena.BogotaMetroApp.persistence.repository.linea.LineaRepository;
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionUpdateDTO;
+import com.sena.BogotaMetroApp.services.exception.interrupcion.InterrupcionException;
 import com.sena.BogotaMetroApp.utils.enums.EstadoInterrupcionEnum;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,20 +34,29 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
     @Override
     @Transactional
     public InterrupcionResponseDTO crear(InterrupcionRequestDTO dto) {
-        Estacion estacion = estacionRepository.findById(dto.getIdEstacion())
-                .orElseThrow(() -> new RuntimeException("Estación no encontrada"));
 
-        Linea linea = lineaRepository.findById(dto.getIdLinea())
-                .orElseThrow(() -> new RuntimeException("Línea no encontrada"));
+
+        if (dto.getIdEstacion() == null && dto.getIdLinea() == null) {
+            throw new InterrupcionException(ErrorCodeEnum.INTERRUPCION_ESTACION_LINEA_REQ);
+        }
 
         Interrupcion inter = new Interrupcion();
-        inter.setEstacion(estacion);
-        inter.setLinea(linea);
+        if (dto.getIdEstacion() != null) {
+            Estacion estacion = estacionRepository.findById(dto.getIdEstacion())
+                    .orElseThrow(() -> new InterrupcionException(ErrorCodeEnum.RUTA_ESTACION_NOT_FOUND));
+            inter.setEstacion(estacion);
+        }
+
+        if (dto.getIdLinea() != null) {
+            Linea linea = lineaRepository.findById(dto.getIdLinea())
+                    .orElseThrow(() -> new InterrupcionException(ErrorCodeEnum.LINEA_NOT_FOUND));
+            inter.setLinea(linea);
+        }
+
         inter.setTipo(dto.getTipo());
         inter.setDescripcion(dto.getDescripcion());
         inter.setInicio(dto.getInicio());
         inter.setFin(dto.getFin());
-
         inter.setEstado(EstadoInterrupcionEnum.ACTIVA);
         inter.setActivo(true);
 
@@ -64,7 +75,7 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
     @Transactional
     public void eliminar(Long id) {
         Interrupcion inter = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Interrupción no encontrada"));
+                .orElseThrow(() -> new InterrupcionException(ErrorCodeEnum.INTERRUPCION_NOT_FOUND));
 
         inter.setActivo(false);
         repository.save(inter);
@@ -78,14 +89,14 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
     public void marcarComoSolucionada(Long id) {
 
         Interrupcion inter = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Interrupción no encontrada"));
+                .orElseThrow(() -> new InterrupcionException(ErrorCodeEnum.INTERRUPCION_NOT_FOUND));
 
         if (!inter.getActivo()) {
-            throw new RuntimeException("No se puede solucionar una interrupción eliminada");
+            throw new InterrupcionException(ErrorCodeEnum.INTERRUPCION_YA_ELIMINADA);
         }
 
         inter.setEstado(EstadoInterrupcionEnum.SOLUCIONADA);
-        inter.setFin(LocalDateTime.now()); // Se arregló justo ahora
+        inter.setFin(LocalDateTime.now());
 
         Interrupcion actualizada = repository.save(inter);
 
@@ -96,15 +107,15 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
     @Override
     public InterrupcionResponseDTO actualizar(Long id, InterrupcionUpdateDTO dto) {
         Interrupcion inter = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Interrupción no encontrada"));
+                .orElseThrow(() -> new InterrupcionException(ErrorCodeEnum.INTERRUPCION_NOT_FOUND));
         if (!inter.getActivo()) {
-            throw new RuntimeException("No se puede editar una interrupción eliminada");
+            throw new InterrupcionException(ErrorCodeEnum.INTERRUPCION_YA_ELIMINADA);
         }
-        if(dto.getTipo() != null) inter.setTipo(dto.getTipo());
-        if(dto.getDescripcion() != null) inter.setDescripcion(dto.getDescripcion());
-        if(dto.getInicio() != null) inter.setInicio(dto.getInicio());
-        if(dto.getFin() != null) inter.setFin(dto.getFin());
-        if(dto.getEstado() != null) inter.setEstado(dto.getEstado());
+        if (dto.getTipo() != null) inter.setTipo(dto.getTipo());
+        if (dto.getDescripcion() != null) inter.setDescripcion(dto.getDescripcion());
+        if (dto.getInicio() != null) inter.setInicio(dto.getInicio());
+        if (dto.getFin() != null) inter.setFin(dto.getFin());
+        if (dto.getEstado() != null) inter.setEstado(dto.getEstado());
 
         Interrupcion actualizada = repository.save(inter);
         InterrupcionResponseDTO responseDTO = mapper.toDTO(actualizada);

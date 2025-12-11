@@ -5,17 +5,18 @@ import com.sena.BogotaMetroApp.presentation.dto.estacion.EstacionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.estacion.EstacionResponseDTO;
 import com.sena.BogotaMetroApp.services.estacion.IEstacionServices;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/estaciones")
+@PreAuthorize("hasRole('OPERADOR')")
 @RequiredArgsConstructor
 public class EstacionController {
 
     private final IEstacionServices estacionService;
-
     @PostMapping
     public EstacionResponseDTO crear(@RequestBody EstacionRequestDTO dto) {
         return estacionService.crear(dto);
@@ -26,6 +27,7 @@ public class EstacionController {
         return estacionService.obtener(id);
     }
 
+    @PreAuthorize("hasAnyRole('OPERADOR','PASAJERO','SOPORTE')")
     @GetMapping
     public List<EstacionResponseDTO> listar() {
         return estacionService.listar();

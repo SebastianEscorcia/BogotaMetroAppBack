@@ -1,6 +1,7 @@
 package com.sena.BogotaMetroApp.presentation.dto.usuario;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sena.BogotaMetroApp.utils.enums.TipoDocumentoEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +26,7 @@ public class RegistroUsuarioBaseDTO {
     @NotBlank(message = "El nombre completo es obligatorio")
     private String nombreCompleto;
     private String telefono;
-    private String tipoDocumento;
+    private TipoDocumentoEnum tipoDocumento;
     private String numDocumento;
     @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate fechaNacimiento;

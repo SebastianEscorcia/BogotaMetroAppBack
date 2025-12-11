@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,11 +27,11 @@ public class TransaccionServiceImpl implements ITransaccionService {
     private final TransaccionMapper transaccionMapper;
     private final TransaccionRepository transaccionRepository;
     private final TarjetaVirtualRepository tarjetaVirtualRepository;
-    private  final RecargaRepository recargaRepository;
+    private final RecargaRepository recargaRepository;
 
     @Override
     @Transactional
-    public TransaccionResponseDTO registrarRecarga(TransaccionRequestDTO dto ) {
+    public TransaccionResponseDTO registrarRecarga(TransaccionRequestDTO dto) {
         Recarga recarga = transaccionMapper.toRecargaEntity(dto);
 
         TarjetaVirtual tarjetaVirtual = tarjetaVirtualRepository.findByPasajeroUsuarioId(recarga.getUsuario().getId()).orElseThrow(() -> new UsuarioException(ErrorCodeEnum.USUARIO_DONT_CARD_ACTIVE));
@@ -87,4 +88,18 @@ public class TransaccionServiceImpl implements ITransaccionService {
                 .map(transaccionMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<TransaccionResponseDTO> obtenerTransaccionesAvanzadas(Long idUsuario, LocalDateTime inicio, LocalDateTime fin, BigDecimal min, BigDecimal max) {
+        if (inicio == null) inicio = LocalDateTime.of(2000, 1, 1, 0, 0);
+        if (fin == null) fin = LocalDateTime.now();
+        if (min == null) min = BigDecimal.ZERO;
+        if (max == null) max = new BigDecimal("999999999");
+
+        return transaccionRepository.findByFiltrosCombinados(idUsuario, inicio, fin, min, max)
+                .stream()
+                .map(transaccionMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }
+

@@ -5,12 +5,14 @@ import com.sena.BogotaMetroApp.presentation.dto.usuario.UsuarioResponseDTO;
 import com.sena.BogotaMetroApp.services.usuario.IUsuarioServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class UsuarioController {
 

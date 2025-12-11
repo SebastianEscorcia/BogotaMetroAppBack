@@ -20,25 +20,39 @@ public enum ErrorCodeEnum implements ErrorCode {
     PAGO_NOT_FOUND("PAGO_NOT_FOUND", "Pago no encontrado en el sistema"),
     PAGO_INVALID("PAGO_INVALID", "Pago inválido"),
     PAGO_DUPLICADO("PAGO_DUPLICADO", "Ya existe un pago con esta referencia"),
-    SALDO_INSUFICIENTE("SALDO_INSUFICIENTE" , "Saldo Insuficiente"),
+    SALDO_INSUFICIENTE("SALDO_INSUFICIENTE", "Saldo Insuficiente"),
 
     // Usuario Errors
     USUARIO_NOT_FOUND("USUARIO_NOT_FOUND", "Usuario no encontrado en  el sistema"),
     USUARIO_INACTIVO("USUARIO_INACTIVO", "El usuario está inactivo"),
-    USUARIO_DONT_CARD_ACTIVE("USUARIO_SIN_TARJETA" , "El usuario no tiene una tarjeta virtual activa"),
+    USUARIO_DONT_CARD_ACTIVE("USUARIO_SIN_TARJETA", "El usuario no tiene una tarjeta virtual activa"),
     USUARIO_YA_EXISTE("USER-409", "El usuario ya existe"),
     // Pasajero Errors
     PASAJERO_USUARIO_NO_EXISTE("PAS-404", "El usuario no existe"),
     PASAJERO_YA_EXISTE("PAS-409", "El usuario ya está registrado "),
     PASAJERO_NO_ENCONTRADO("PAS-404B", "Pasajero no encontrado"),
 
-    // Viaje Errors
-    VIAJE_NOT_FOUND("VIAJE_NOT_FOUND", "Viaje no encontrado en el sistema"),
-    VIAJE_YA_FINALIZADO("VIAJE_YA_FINALIZADO", "Este viaje ya ha finalizado"),
-
     //Pasarela Errors
     PASARELA_NOT_FOUND("PASARELA_NOT_FOUND", "Pasarela de pago no encontrada"),
     PASARELA_INACTIVA("PASARELA_INACTIVA", "La pasarela de pago está inactiva"),
+
+    // Ruta Errors
+    RUTA_NOT_FOUND("RUTA_NOT_FOUND", "La ruta solicitada no existe"),
+    RUTA_ESTACION_REQ("RUTA_ESTACION_REQ", "Se requieren las estaciones de inicio y fin"),
+    RUTA_ESTACION_NOT_FOUND("RUTA_ESTACION_NOT_FOUND", "Una de las estaciones especificadas no existe"),
+    RUTA_HORA_FORMATO_INVALIDO("RUTA_HORA_FORMATO_INVALIDO", "El formato de la hora de inicio de la ruta es inválido"),
+
+    // Interrupcion Errors
+    INTERRUPCION_NOT_FOUND("INTERRUPCION_NOT_FOUND", "La interrupción solicitada no existe"),
+    INTERRUPCION_ESTACION_LINEA_REQ("INTERRUPCION_REQ", "Debe especificar al menos una Estación o una Línea"),
+    INTERRUPCION_YA_ELIMINADA("INTERRUPCION_DELETED", "No se puede modificar una interrupción que ya fue eliminada"),
+    INTERRUPCION_TIPO_INVALIDO("INTERRUPCION_TYPE_INVALID", "El tipo de interrupción no es válido"),
+
+    // Linea Errors
+    LINEA_NOT_FOUND("LINEA_NOT_FOUND", "La línea solicitada no existe"),
+
+    // JSON Errors
+    JSON_FORMAT_ERROR("JSON_FORMAT_ERROR", "El formato del JSON enviado es incorrecto o contiene valores no permitidos"),
 
     // Tarjeta Errors,
     NUM_CARD_FORMAT("NUM_CARD_FORMAT", "Número de la tarjeta no tiene formato"),
@@ -48,8 +62,19 @@ public enum ErrorCodeEnum implements ErrorCode {
     UNAUTHORIZED("UNAUTHORIZED", "No tiene autorización para realizar esta acción"),
     FORBIDDEN("FORBIDDEN", "Acceso denegado"),
 
-    // Chats Errors
 
+    // Transaccion Errors
+    ACCESO_DENEGADO("TRANSACCION_FORBIDDEN", "Acceso denegado: Usted no es el propietario de esta transacción"),
+
+    // Horario Sistema Errors
+    HORARIO_NOT_FOUND("HORARIO_NOT_FOUND","Horario del sistema no encontrado"),
+    HORARIO_INVALID_TIME("HORARIO_INVALID_TIME","Hora de fin debe ser posterior a hora de inicio"),
+
+    // Tarifa Sistema Errors
+    TARIFA_NOT_FOUND("TARIFA_NOT_FOUND", "No hay tarifa configurada en el sistema"),
+    TARIFA_VALOR_INVALIDO("TARIFA_VALOR_INVALIDO", "El valor de la tarifa debe ser mayor a cero"),
+    TARIFA_YA_EXISTE("TARIFA_YA_EXISTE", "Ya existe una tarifa activa en el sistema"),
+    // Chats Errors
     CHAT_SESION_NOT_FOUND("CHAT_NOT_FOUND", "La sesión de chat no existe"),
     CHAT_CERRADO("CHAT_CLOSED", "No se pueden enviar mensajes a una sesión cerrada"),
     CHAT_ACCESO_DENEGADO("CHAT_FORBIDDEN", "Acceso denegado: Usted no es un participante activo de este chat"),

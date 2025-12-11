@@ -5,15 +5,16 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class QrRequestDTO {
     @NotNull(message = "El ID de usuario es obligatorio")
     private Long idUsuario;
-    private Long idPago;   // opcional si tipo == PAGO
-    private Long idViaje;
+    private LocalDateTime fechaExpiracion = LocalDateTime.now().plusDays(5);
     @NotNull(message = "El tipo de QR es obligatorio")
-    private TipoQr tipo;
+    private TipoQr tipo = TipoQr.ACCESO;
 
 }
 

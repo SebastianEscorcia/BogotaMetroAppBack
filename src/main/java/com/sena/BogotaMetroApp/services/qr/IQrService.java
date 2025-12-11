@@ -1,20 +1,15 @@
 package com.sena.BogotaMetroApp.services.qr;
 
-import com.sena.BogotaMetroApp.persistence.models.Viaje;
-import com.sena.BogotaMetroApp.persistence.models.transaccion.Transaccion;
-import com.sena.BogotaMetroApp.persistence.models.pasajero.Pasajero;
-import com.sena.BogotaMetroApp.persistence.models.qr.Qr;
-import com.sena.BogotaMetroApp.presentation.dto.qr.QrRequestDTO;
+
 import com.sena.BogotaMetroApp.presentation.dto.qr.QrResponseDTO;
-import com.sena.BogotaMetroApp.presentation.dto.qr.ValidarQrRequest;
-import com.sena.BogotaMetroApp.presentation.dto.qr.ValidarQrResponse;
+import com.sena.BogotaMetroApp.persistence.models.qr.Qr;
 
 public interface IQrService {
-    QrResponseDTO generarQr(QrRequestDTO request);
 
-    Qr generarEntidadQrParaViaje(Pasajero pasajero, Viaje viaje, Transaccion transaccion);
+    QrResponseDTO generarQrAcceso(String email);
 
-    ValidarQrResponse validarQrEnTorniquete(ValidarQrRequest request);
+    // Busca un QR por su contenido, valida expiración y consumo y devuelve la entidad para uso interno
+    Qr validarYObtenerPorContenido(String contenidoQr);
 
-    QrResponseDTO regenerarQrViaje(Long idPago);
+    Qr consumirQr(Qr qr);
 }
