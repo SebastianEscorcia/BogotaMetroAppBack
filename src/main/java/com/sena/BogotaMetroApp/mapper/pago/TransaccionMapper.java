@@ -1,7 +1,7 @@
 package com.sena.BogotaMetroApp.mapper.pago;
 
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
-import com.sena.BogotaMetroApp.persistence.models.transaccion.CompraTicket;
+import com.sena.BogotaMetroApp.persistence.models.transaccion.CobroPasaje;
 import com.sena.BogotaMetroApp.persistence.models.transaccion.Recarga;
 import com.sena.BogotaMetroApp.persistence.repository.pasarela.PasarelaRepository;
 import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
@@ -30,7 +30,6 @@ public class TransaccionMapper {
      *  Retorna la Recarga 'Pago' sin guardar.
      */
     public Recarga toRecargaEntity(TransaccionRequestDTO dto) {
-        // Validar existencia de entidades relacionadas es aceptable en el Mapper
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new UsuarioException(ErrorCodeEnum.USUARIO_NOT_FOUND));
 
@@ -39,14 +38,12 @@ public class TransaccionMapper {
 
 
         Recarga recarga = new Recarga();
-        // Campos del Padre (Transaccion)
         recarga.setUsuario(usuario);
         recarga.setValor(dto.getValorPagado());
         recarga.setDescripcion(dto.getDescripcion());
         recarga.setMoneda(dto.getMoneda() != null ? dto.getMoneda() : MonedaEnum.COP);
         recarga.setFecha(LocalDateTime.now());
 
-        // Campos del Hijo (Recarga)
         recarga.setPasarela(pasarela);
         recarga.setReferenciaPasarela(dto.getReferenciaPasarela());
         recarga.setMedioDePago(dto.getMedioDePago());
@@ -55,7 +52,7 @@ public class TransaccionMapper {
     }
 
     /**
-     * Convierte entidad Pago a PagoResponseDTO
+     * Convierte entidad Transaccion (Polimórfica) a TransaccionResponseDTO
      */
     public TransaccionResponseDTO toDTO(Transaccion transaccion) {
         TransaccionResponseDTO dto = new TransaccionResponseDTO();
@@ -67,16 +64,13 @@ public class TransaccionMapper {
 
         if (transaccion.getUsuario() != null) {
             dto.setIdUsuario(transaccion.getUsuario().getId());
-            // Manejo de null pointer si datos personales es null
             if (transaccion.getUsuario().getDatosPersonales() != null) {
                 dto.setNombreUsuario(transaccion.getUsuario().getDatosPersonales().getNombreCompleto());
             }
         }
 
-
-        // Lógica específica según el tipo de instancia
-        if (transaccion instanceof Recarga) {
-            Recarga recarga = (Recarga) transaccion;
+        // 1. Si es una RECARGA
+        if (transaccion instanceof Recarga recarga) {
             dto.setReferenciaPasarela(recarga.getReferenciaPasarela());
             dto.setMedioDePago(recarga.getMedioDePago());
 
@@ -84,11 +78,10 @@ public class TransaccionMapper {
                 dto.setIdPasarela(recarga.getPasarela().getId());
                 dto.setNombrePasarela(recarga.getPasarela().getNombre());
             }
-            // Puedes agregar un campo "tipo" al DTO si quieres
-            // dto.setTipo("RECARGA");
-        } else if (transaccion instanceof CompraTicket) {
-            // Lógica para CompraTicket si la necesitas en el futuro
-            // dto.setTipo("COMPRA_TICKET");
+        }
+        // 2. Si es un COBRO DE PASAJE (Torniquete)
+        else if (transaccion instanceof CobroPasaje cobro) {
+            dto.setIdEstacion(cobro.getEstacionId());
         }
 
         return dto;

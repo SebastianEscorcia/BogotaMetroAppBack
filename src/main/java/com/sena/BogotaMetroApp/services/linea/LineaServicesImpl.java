@@ -31,12 +31,14 @@ public class LineaServicesImpl implements ILineaServices {
     public LineaResponseDTO obtener(Long id) {
         Linea linea = lineaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Línea no encontrada"));
+        if (!linea.isActivo()) throw new RuntimeException("Línea no encontrada (Eliminada)");
+
         return lineaMapper.toDTO(linea);
     }
 
     @Override
     public List<LineaResponseDTO> listar() {
-        return lineaRepository.findAll().stream()
+        return lineaRepository.findByActivoTrue().stream()
                 .map(lineaMapper::toDTO)
                 .toList();
     }
@@ -57,6 +59,9 @@ public class LineaServicesImpl implements ILineaServices {
 
     @Override
     public void eliminar(Long id) {
-        lineaRepository.deleteById(id);
+        Linea linea = lineaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Línea no encontrada"));
+        linea.setActivo(false);
+        lineaRepository.save(linea);
     }
 }

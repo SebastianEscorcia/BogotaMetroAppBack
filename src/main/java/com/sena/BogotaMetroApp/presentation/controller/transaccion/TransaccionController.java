@@ -1,18 +1,21 @@
 package com.sena.BogotaMetroApp.presentation.controller.transaccion;
 
-import com.sena.BogotaMetroApp.persistence.models.Usuario;
-import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionResponseDTO;
+import com.sena.BogotaMetroApp.security.TransaccionSecurityService;
+import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import com.sena.BogotaMetroApp.services.transaccion.ITransaccionService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,60 +26,76 @@ import java.util.List;
 public class TransaccionController {
 
     private final ITransaccionService transaccionService;
-    private final UsuarioRepository usuarioRepository;
+    private final TransaccionSecurityService transaccionSecurityService;
 
+
+    @PreAuthorize("hasRole('PASAJERO')")
     @PostMapping("/registrar")
-    public ResponseEntity<TransaccionResponseDTO> registrarPago(@RequestBody TransaccionRequestDTO dto, Authentication authentication) {
+    public ResponseEntity<TransaccionResponseDTO> registrarPago(@RequestBody TransaccionRequestDTO dto) {
 
-        Object principal = authentication.getPrincipal();
-        Usuario usuarioToken;
-
-        if (principal instanceof Usuario) {
-            usuarioToken = (Usuario) principal;
-        } else {
-            // Fallback por si acaso la configuración de seguridad cambia y devuelve solo el string
-            String correo = authentication.getName();
-            usuarioToken = usuarioRepository.findByCorreo(correo)
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + correo));
-        }
-
-        dto.setIdUsuario(usuarioToken.getId());
-
-        dto.setIdUsuario(usuarioToken.getId());
-
+        dto.setIdUsuario(transaccionSecurityService.obtenerIdUsuarioAutenticado(
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+        ));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(transaccionService.registrarRecarga(dto));
     }
 
+    @PreAuthorize("hasAnyRole('SOPORTE', 'PASAJERO')")
     @GetMapping("/{id}")
     public ResponseEntity<TransaccionResponseDTO> obtenerPagoPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(transaccionService.obtenerTransaccionPorId(id));
+        TransaccionResponseDTO tx = transaccionService.obtenerTransaccionPorId(id);
+
+        if (!transaccionSecurityService.esDueñoOEsSoporte(tx.getIdUsuario()))
+            throw new UsuarioException(ErrorCodeEnum.ACCESO_DENEGADO);
+
+        return ResponseEntity.ok(tx);
     }
 
+
+    @PreAuthorize("@transaccionSecurityService.esDueñoOEsSoporte(#idUsuario)")
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorUsuario(@PathVariable Long idUsuario) {
         return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorUsuario(idUsuario));
     }
 
-    @GetMapping("/pasarela/{idPasarela}")
-    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorPasarela(@PathVariable Long idPasarela) {
-        return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorPasarela(idPasarela));
-    }
-
-    @GetMapping("/referencia/{referencia}")
-    public ResponseEntity<TransaccionResponseDTO> obtenerPagoPorReferencia(@PathVariable String referencia) {
-        return ResponseEntity.ok(transaccionService.obtenerTransaccionPorReferencia(referencia));
-    }
-
+    @PreAuthorize("hasRole('SOPORTE')")
     @GetMapping("/fechas")
-    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorFechas(
+    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosGlobalesPorFechas(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {
         return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorFechas(fechaInicio, fechaFin));
     }
 
+    //Filtro para buscar transacciones por varios criterios como monto y fechas
+    @PreAuthorize("@transaccionSecurityService.esDueñoOEsSoporte(#idUsuario)")
+    @GetMapping("/usuario/{idUsuario}/buscar")
+    public ResponseEntity<List<TransaccionResponseDTO>> buscarTransacciones(
+            @PathVariable Long idUsuario,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin,
+            @RequestParam(required = false) BigDecimal min,
+            @RequestParam(required = false) BigDecimal max,
+            Authentication auth) {
+
+        return ResponseEntity.ok(transaccionService.obtenerTransaccionesAvanzadas(idUsuario, fechaInicio, fechaFin, min, max));
+    }
+
+    @PreAuthorize("hasRole('SOPORTE')")
+    @GetMapping("/pasarela/{idPasarela}")
+    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorPasarela(@PathVariable Long idPasarela) {
+        return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorPasarela(idPasarela));
+    }
+
+    // Ver por referencia de pasarela (para reclamos)
+    @PreAuthorize("hasRole('SOPORTE')")
+    @GetMapping("/referencia/{referencia}")
+    public ResponseEntity<TransaccionResponseDTO> obtenerPagoPorReferencia(@PathVariable String referencia) {
+        return ResponseEntity.ok(transaccionService.obtenerTransaccionPorReferencia(referencia));
+    }
+
+
     @GetMapping("/usuario/{idUsuario}/fechas")
-    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorUsuarioYFechas(
+        public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorUsuarioYFechas(
             @PathVariable Long idUsuario,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {

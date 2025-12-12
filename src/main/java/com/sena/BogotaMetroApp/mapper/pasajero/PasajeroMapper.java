@@ -7,6 +7,8 @@ import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroUpdateDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 @RequiredArgsConstructor
 public class PasajeroMapper {
@@ -20,6 +22,10 @@ public class PasajeroMapper {
 
         if (p.getTarjetaVirtual() != null) {
             dto.setIdTarjetaVirtual(p.getTarjetaVirtual().getIdTarjeta());
+            dto.setSaldo(p.getTarjetaVirtual().getSaldo());
+
+        }else{
+            dto.setSaldo(BigDecimal.ZERO);
         }
 
 

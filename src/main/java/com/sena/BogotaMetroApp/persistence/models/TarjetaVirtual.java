@@ -1,6 +1,7 @@
 package com.sena.BogotaMetroApp.persistence.models;
 
 import com.sena.BogotaMetroApp.persistence.models.pasajero.Pasajero;
+import com.sena.BogotaMetroApp.utils.enums.EstadoTarjetaEnum;
 import com.sena.BogotaMetroApp.utils.logic.TarjetaUtil;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,8 +27,9 @@ public class TarjetaVirtual {
     @Column(name = "saldo", nullable = false)
     private BigDecimal saldo;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false) // ACTIVA, BLOQUEADA, INACTIVA
-    private String estado;
+    private EstadoTarjetaEnum estado;
 
     @Column(name = "fecha_creacion")
     private LocalDate fechaCreacion;
@@ -51,7 +53,7 @@ public class TarjetaVirtual {
             this.fechaCreacion = LocalDate.now();
         }
         if (this.estado == null) {
-            this.estado = "ACTIVA";
+            this.estado = EstadoTarjetaEnum.ACTIVA;
         }
     }
 }

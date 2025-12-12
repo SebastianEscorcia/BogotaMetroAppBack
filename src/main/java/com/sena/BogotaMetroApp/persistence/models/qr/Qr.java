@@ -1,9 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models.qr;
 
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
-import com.sena.BogotaMetroApp.persistence.models.Viaje;
-import com.sena.BogotaMetroApp.persistence.models.transaccion.Transaccion;
-import com.sena.BogotaMetroApp.persistence.models.pasajeroviaje.PasajeroViaje;
 import com.sena.BogotaMetroApp.utils.enums.TipoQr;
 import jakarta.persistence.*;
 
@@ -27,7 +24,7 @@ public class Qr {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false)
-    private TipoQr tipo; // PAGO o VIAJE
+    private TipoQr tipo;
 
     @Column(name = "fecha_generacion", nullable = false)
     private LocalDateTime fechaGeneracion;
@@ -36,21 +33,17 @@ public class Qr {
     @Column(name = "consumido", nullable = false)
     private Boolean consumido = false;
 
-    @OneToOne(mappedBy = "qr")
-    private PasajeroViaje pasajeroViaje;
-
-    @ManyToOne
-    @JoinColumn(name = "id_transaccion_fk")
-    private Transaccion transaccion;
-
-    @ManyToOne
-    @JoinColumn(name = "id_viajeFK")
-    private Viaje viaje;
+    @Column(name = "fecha_expiracion", nullable = false)
+    private LocalDateTime fechaExpiracion;
 
     // Usuario dueño del QR
     @ManyToOne
     @JoinColumn(name = "id_usuarioFK", nullable = false)
     private Usuario usuario;
+
+    @Version
+    private Long version;
+
 
 
 }

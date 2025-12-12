@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Implementación del servicio para el procesamiento y almacenamiento de mensajes en sesiones de chat.
+ */
 @Service
 @RequiredArgsConstructor
 public class ChatMensajeServiceImpl implements IChatMensajeService {

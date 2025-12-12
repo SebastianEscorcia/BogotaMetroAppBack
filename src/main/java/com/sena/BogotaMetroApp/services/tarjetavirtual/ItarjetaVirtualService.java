@@ -1,9 +1,12 @@
 package com.sena.BogotaMetroApp.services.tarjetavirtual;
 
-import com.sena.BogotaMetroApp.persistence.models.transaccion.CompraTicket;
 import java.math.BigDecimal;
 
 
 public interface ItarjetaVirtualService {
-    CompraTicket descontarSaldo(Long idUsuario, BigDecimal valorADescontar);
+    /**
+     * Descuenta saldo de la tarjeta del usuario.
+     * Lanza excepción si no tiene saldo o no tiene tarjeta.
+     */
+    void descontarSaldo(Long idUsuario, BigDecimal valorADescontar);
 }

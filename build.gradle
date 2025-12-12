@@ -35,6 +35,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'com.google.firebase:firebase-admin:9.2.0'
 
+    //Dependencia para manejo de cache
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    //Dependencia para enviar correos
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     //Dependencia Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     // Dependencias para JWT
@@ -43,6 +47,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
     implementation 'org.springframework.security:spring-security-crypto'
+
+    // Dependencia conector mysql
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 

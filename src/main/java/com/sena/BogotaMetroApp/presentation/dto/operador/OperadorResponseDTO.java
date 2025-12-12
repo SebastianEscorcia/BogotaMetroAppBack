@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.presentation.dto.operador;
 
+import com.sena.BogotaMetroApp.utils.enums.TipoDocumentoEnum;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,6 @@ public class OperadorResponseDTO {
     private String correo;
     private String nombreCompleto;
     private String telefono;
-    private String tipoDocumento;
+    private TipoDocumentoEnum tipoDocumento;
     private String numDocumento;
 }

@@ -1,21 +1,17 @@
 package com.sena.BogotaMetroApp.services.qr;
 
-import com.sena.BogotaMetroApp.persistence.models.Viaje;
-import com.sena.BogotaMetroApp.persistence.models.pasajero.Pasajero;
-import com.sena.BogotaMetroApp.presentation.dto.qr.QrRequestDTO;
+import com.sena.BogotaMetroApp.externalservices.RedisCacheService;
+import com.sena.BogotaMetroApp.persistence.models.Usuario;
+import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
+import com.sena.BogotaMetroApp.presentation.dto.QrCacheDTO;
 import com.sena.BogotaMetroApp.presentation.dto.qr.QrResponseDTO;
-import com.sena.BogotaMetroApp.presentation.dto.qr.ValidarQrRequest;
-import com.sena.BogotaMetroApp.presentation.dto.qr.ValidarQrResponse;
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
-import com.sena.BogotaMetroApp.services.exception.pago.PagoException;
-import com.sena.BogotaMetroApp.services.exception.qr.QrException;
 import com.sena.BogotaMetroApp.mapper.qr.QrMapper;
-import com.sena.BogotaMetroApp.persistence.models.transaccion.Transaccion;
 import com.sena.BogotaMetroApp.persistence.models.qr.Qr;
-import com.sena.BogotaMetroApp.persistence.repository.transaccion.TransaccionRepository;
 import com.sena.BogotaMetroApp.persistence.repository.qr.QrRepository;
 
-
+import com.sena.BogotaMetroApp.services.exception.qr.QrException;
+import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import com.sena.BogotaMetroApp.utils.enums.TipoQr;
 import com.sena.BogotaMetroApp.utils.validators.QrValidator;
 import jakarta.transaction.Transactional;
@@ -23,105 +19,161 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
+import java.util.Optional;
 
 
 @Service
 @RequiredArgsConstructor
 public class QrServiceImpl implements IQrService {
 
-    private final QrMapper qrMapper;
     private final QrRepository qrRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final QrMapper qrMapper;
     private final QrValidator qrValidator;
-    private final TransaccionRepository transaccionRepository;
-    private final QrResponseBuilder qrResponseBuilder;
+    private final IQrNoUsadoService qrNoUsadoService;
+    private final RedisCacheService redisCacheService;
+    private static final int MINUTOS_EXPIRACION = 15;
 
 
+    /**
+     *  Genera un código QR de acceso para el usuario con el correo electrónico proporcionado.
+     *  Si el usuario ya tiene un código QR activo y válido, se devuelve ese código,
+     *  Si el usuario tiene un código QR no consumido pero expirado, se mueve a la tabla de códigos QR no usados y se crea uno nuevo,
+     *  y si ya  tiene un condigo qr activo, se devuelve ese.
+     * @param email Correo electrónico del usuario para el cual se generará el código QR.
+     * @return QrResponseDTO
+     */
     @Override
     @Transactional
-    public QrResponseDTO generarQr(QrRequestDTO request) {
-        validarRequestConsistencia(request);
-        Qr qr = qrMapper.toEntity(request);
-        qrRepository.save(qr);
-        return qrMapper.toDTO(qr);
+    public QrResponseDTO generarQrAcceso(String email) {
+        Usuario usuario = usuarioRepository.findByCorreo(email)
+                .orElseThrow(() -> new UsuarioException(ErrorCodeEnum.USUARIO_NOT_FOUND));
+
+        Long usuarioId = usuario.getId();
+        LocalDateTime ahora = LocalDateTime.now();
+
+        // 1. Intentar obtener desde caché
+        QrResponseDTO cacheado = obtenerDesdeCache(usuarioId, ahora);
+        if (cacheado != null) {
+            return cacheado;
+        }
+
+        // 2. Buscar QR activo en BD
+        Optional<Qr> activoOpt = qrRepository.findQrActivoByUsuario(usuarioId, ahora);
+        if (activoOpt.isPresent()) {
+            return cachearYRetornar(activoOpt.get());
+        }
+
+        // 3. Procesar QR no consumido (puede estar expirado)
+        Optional<Qr> ultimoOpt = qrRepository.findLatestNotConsumedQrForUserForUpdate(usuarioId);
+        if (ultimoOpt.isPresent()) {
+            return procesarQrExistente(ultimoOpt.get(), usuario, ahora);
+        }
+
+        // 4. No existe ningún QR → crear nuevo
+        return crearYCachearNuevoQr(usuario);
     }
 
+
     @Override
-    @Transactional
-    public ValidarQrResponse validarQrEnTorniquete(ValidarQrRequest request) {
-        Qr qr = qrRepository.findByContenidoQr(request.getContenidoQr())
+    public Qr validarYObtenerPorContenido(String contenidoQr) {
+        Qr qr = qrRepository.findByContenidoQr(contenidoQr)
                 .orElseThrow(() -> new QrException(ErrorCodeEnum.QR_NOT_FOUND));
 
         qrValidator.validarQrParaTorniquete(qr);
 
-        qr.setConsumido(true);
-        qrRepository.save(qr);
-
-        return qrResponseBuilder.buildSuccessResponse(qr);
+        return qr;
     }
 
     @Override
     @Transactional
-    public QrResponseDTO regenerarQrViaje(Long idPago) {
-        Transaccion transaccion = transaccionRepository.findById(idPago)
-                .orElseThrow(() -> new PagoException(ErrorCodeEnum.PAGO_NOT_FOUND));
+    public Qr consumirQr(Qr qrB) {
 
-        List<Qr> qrsAnteriores = qrRepository.findQrsByTransaccionOrderByFechaDesc(idPago);
+        Qr qr = qrRepository.findById(qrB.getId())
+                .orElseThrow(() -> new QrException(ErrorCodeEnum.QR_NOT_FOUND));
 
-        if (qrsAnteriores.isEmpty()) {
-            throw new QrException(ErrorCodeEnum.QR_NO_PREVIOUS);
+        //  Idempotencia: ya consumido -> igual invalidamos cache
+        if (qr.getConsumido()) {
+
+            QrCacheDTO dto = new QrCacheDTO();
+            dto.setUsuarioId(qr.getUsuario().getId());
+            dto.setContenido(qr.getContenidoQr());
+
+            redisCacheService.invalidate(dto);
+            return qr;
         }
 
-        Qr qrAnterior = qrsAnteriores.get(0);
-        qrValidator.validarParaRegeneracion(qrAnterior);
 
-        QrRequestDTO request = crearRequestParaRegeneracion(transaccion, qrAnterior);
-        return generarQr(request);
+        qr.setConsumido(true);
+
+        // JPA incrementa @Version
+        Qr saved = qrRepository.save(qr);
+
+        // Invalidar cache correctamente
+        QrCacheDTO dto = new QrCacheDTO();
+        dto.setUsuarioId(saved.getUsuario().getId());
+        dto.setContenido(saved.getContenidoQr());
+
+        redisCacheService.invalidate(dto);
+
+        return saved;
     }
 
-    @Override
-    @Transactional
-    public Qr generarEntidadQrParaViaje(Pasajero pasajero, Viaje viaje, Transaccion transaccion) {
 
+    private QrResponseDTO obtenerDesdeCache(Long usuarioId, LocalDateTime ahora) {
+        QrCacheDTO cache = redisCacheService.getQrUsuario(usuarioId);
+
+        if (cache == null) {
+            return null;
+        }
+
+        boolean esValido = cache.getFechaExpiracion().isAfter(ahora) && !cache.isConsumido();
+
+        if (esValido) {
+            return qrMapper.toDTOFromCache(cache);
+        }
+
+        redisCacheService.invalidate(cache);
+        return null;
+    }
+
+    private QrResponseDTO procesarQrExistente(Qr qr, Usuario usuario, LocalDateTime ahora) {
+        boolean estaExpirado = qr.getFechaExpiracion().isBefore(ahora);
+
+        if (estaExpirado) {
+            moverAHistoricoYEliminar(qr);
+            return crearYCachearNuevoQr(usuario);
+        }
+
+        return cachearYRetornar(qr);
+    }
+
+    private void moverAHistoricoYEliminar(Qr qr) {
+        qrNoUsadoService.moverQrNoUsadoAndExpirado(qr);
+        qrRepository.delete(qr);
+        qrRepository.flush();
+    }
+
+    private QrResponseDTO crearYCachearNuevoQr(Usuario usuario) {
+        Qr nuevo = crearNuevoQr(usuario);
+        return cachearYRetornar(nuevo);
+    }
+
+    private QrResponseDTO cachearYRetornar(Qr qr) {
+        redisCacheService.cacheQr(qrMapper.toCacheDTO(qr));
+        return qrMapper.toDTO(qr);
+    }
+
+    private Qr crearNuevoQr(Usuario usuario) {
         Qr qr = new Qr();
-        String contenidoUnico = qrMapper.generarContenidoQr(TipoQr.VIAJE, pasajero.getId(), viaje.getId());
-        qr.setContenidoQr(contenidoUnico);
-        qr.setTipo(TipoQr.VIAJE);
+        qr.setUsuario(usuario);
+        qr.setTipo(TipoQr.ACCESO);
         qr.setFechaGeneracion(LocalDateTime.now());
+        qr.setFechaExpiracion(LocalDateTime.now().plusMinutes(MINUTOS_EXPIRACION));
         qr.setConsumido(false);
-        qr.setUsuario(pasajero.getUsuario());
-        qr.setViaje(viaje);
-        qr.setTransaccion(transaccion);
+        qr.setContenidoQr(qrMapper.generarContenidoQr(TipoQr.ACCESO, usuario.getId(), usuario.getId()));
+
         return qrRepository.save(qr);
     }
-
-
-    private QrRequestDTO crearRequestParaRegeneracion(Transaccion transaccion, Qr qrAnterior) {
-        QrRequestDTO request = new QrRequestDTO();
-        request.setIdUsuario(transaccion.getUsuario().getId());
-        request.setIdViaje(qrAnterior.getViaje().getId());
-        request.setIdPago(transaccion.getId());
-        request.setTipo(TipoQr.VIAJE);
-        return request;
-    }
-
-    private void validarRequestConsistencia(QrRequestDTO request) {
-        if (request.getTipo() == TipoQr.PAGO) {
-            if (request.getIdPago() == null) {
-                throw new QrException(ErrorCodeEnum.QR_PAGO_REQUIRED);
-            }
-            if (request.getIdViaje() != null) {
-                throw new QrException(ErrorCodeEnum.QR_INVALID_COMBINATION);
-            }
-        }
-
-        if (request.getTipo() == TipoQr.VIAJE) {
-            if (request.getIdViaje() == null) {
-                throw new QrException(ErrorCodeEnum.QR_VIAJE_REQUIRED);
-            }
-        }
-    }
-
 
 }

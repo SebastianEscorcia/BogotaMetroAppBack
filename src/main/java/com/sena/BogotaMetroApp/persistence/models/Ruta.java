@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @Table(name = "rutas")
 @Getter
 @Setter
-public class Ruta {
+public class Ruta extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

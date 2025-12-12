@@ -6,12 +6,14 @@ import com.sena.BogotaMetroApp.services.pasarela.IPasarelaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/pasarelas")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class PasarelaController {
 
@@ -28,6 +30,7 @@ public class PasarelaController {
         return ResponseEntity.ok(pasarelaService.obtenerPasarelaPorId(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'PASAJERO')")
     @GetMapping
     public ResponseEntity<List<PasarelaResponseDTO>> obtenerTodasLasPasarelas() {
         return ResponseEntity.ok(pasarelaService.obtenerTodasLasPasarelas());

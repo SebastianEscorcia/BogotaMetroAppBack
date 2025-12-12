@@ -8,4 +8,6 @@ import java.util.List;
 public interface IPuntoInteresService {
     PuntoInteresResponseDTO crear(PuntoInteresRequestDTO dto);
     List<PuntoInteresResponseDTO> listar();
+    PuntoInteresResponseDTO actualizar(Long id, PuntoInteresRequestDTO dto);
+    public void eliminar(Long id);
 }

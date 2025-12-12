@@ -12,7 +12,10 @@ public class UsuarioMapper {
         UsuarioResponseDTO dto = new UsuarioResponseDTO();
         dto.setId(usuario.getId());
         dto.setCorreo(usuario.getCorreo());
-        dto.setRol(usuario.getRol().getNombre());
+
+        if (usuario.getRol() != null) {
+            dto.setRol(usuario.getRol().getNombre());
+        }
 
         if (usuario.getDatosPersonales() != null) {
             dto.setNombreCompleto(usuario.getDatosPersonales().getNombreCompleto());

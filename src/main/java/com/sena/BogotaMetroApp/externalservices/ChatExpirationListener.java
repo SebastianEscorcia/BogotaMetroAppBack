@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * Listener para eventos de expiración de claves en Redis relacionados con sesiones de chat.
+ * Cuando una clave de sesión de chat expira, este listener cierra la sesión en la base de datos
+ * y notifica a los usuarios involucrados.
+ */
 @Component
 @Slf4j
 public class ChatExpirationListener extends KeyExpirationEventMessageListener {

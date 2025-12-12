@@ -20,4 +20,7 @@ public class Role {
     @Column(name = "nombre_rol", unique = true, nullable = false)
     private String nombre;
 
+    public Role(String nombre) {
+        this.nombre = nombre;
+    }
 }

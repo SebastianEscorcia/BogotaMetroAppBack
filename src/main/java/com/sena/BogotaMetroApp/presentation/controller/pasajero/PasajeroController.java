@@ -1,12 +1,14 @@
 package com.sena.BogotaMetroApp.presentation.controller.pasajero;
 
-import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroRequestDTO;
+
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroResponseDTO;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.RegistroPasajeroUnificadoDTO;
 import com.sena.BogotaMetroApp.services.pasajero.IPasajeroService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -27,21 +29,30 @@ public class PasajeroController {
         return ResponseEntity.created(location).body(created);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','PASAJERO')")
     @GetMapping("/{id}")
     public ResponseEntity<PasajeroResponseDTO> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(pasajeroService.obtener(id));
     }
 
+    @PreAuthorize("hasAnyRole('SOPORTE', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<PasajeroResponseDTO>> listar() {
         return ResponseEntity.ok(pasajeroService.listarTodos());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'PASAJERO')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         pasajeroService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('PASAJERO')")
+    public ResponseEntity<PasajeroResponseDTO> obtenerMisDatos() {
+        String correoAutenticado = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(pasajeroService.obtenerPorCorreo(correoAutenticado));
+    }
 
 }

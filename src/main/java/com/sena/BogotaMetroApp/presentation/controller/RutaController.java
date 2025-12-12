@@ -4,12 +4,14 @@ import com.sena.BogotaMetroApp.presentation.dto.ruta.RutaRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.ruta.RutaResponseDTO;
 import com.sena.BogotaMetroApp.services.ruta.IRutaServices;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/rutas")
+@PreAuthorize("hasRole('OPERADOR')")
 @RequiredArgsConstructor
 public class RutaController {
 

@@ -2,11 +2,12 @@ package com.sena.BogotaMetroApp.services;
 
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import java.security.Key;
 import java.util.Date;
 
 @Service
@@ -14,10 +15,26 @@ public class JwtServices {
 
     @Value("${app.security.jwt-key}")
     private String SECRETE ;
-    public String generateToken(Usuario usuario){
-        return Jwts.builder().setSubject(usuario.getCorreo()).claim("rol",usuario.getRol().getNombre()).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis()+ 1000 * 60 * 60 * 10)).signWith(Keys.hmacShaKeyFor(SECRETE.getBytes()), SignatureAlgorithm.HS256).compact();
+
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRETE.getBytes());
     }
-    public  String extraerCorreo(String token){
-        return  Jwts.parser().setSigningKey(SECRETE.getBytes()).build().parseClaimsJws(token).getBody().getSubject();
+
+    public String generateToken(Usuario usuario) {
+        return Jwts.builder()
+                .subject(usuario.getCorreo())
+                .claim("rol", usuario.getRol().getNombre())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .signWith(getSigningKey())
+                .compact();
+    }
+    public String extraerCorreo(String token){
+        return Jwts.parser()
+                .verifyWith((SecretKey) getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
 }

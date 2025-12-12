@@ -22,4 +22,5 @@ public class TransaccionResponseDTO {
     private String nombreUsuario;
     private Long idPasarela;
     private String nombrePasarela;
+    private Long idEstacion;
 }

@@ -13,4 +13,5 @@ public class QrResponseDTO {
     private TipoQr tipo;
     private String contenidoQr;
     private LocalDateTime fechaGeneracion;
+    private LocalDateTime fechaExpiracion;
 }

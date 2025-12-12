@@ -11,6 +11,7 @@ public class PuntoInteresResponseDTO {
     private Long id;
     private Long idEstacion;
     private String nombre;
+    private String descripcion;
     private String categoria;
     private BigDecimal latitud;
     private BigDecimal longitud;

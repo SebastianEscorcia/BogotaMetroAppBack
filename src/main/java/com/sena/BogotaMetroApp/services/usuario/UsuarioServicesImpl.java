@@ -7,6 +7,8 @@ import com.sena.BogotaMetroApp.persistence.models.Role;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.repository.RoleRepository;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
+import com.sena.BogotaMetroApp.services.factory.UsuarioFactory;
+import com.sena.BogotaMetroApp.utils.enums.RoleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,22 +20,13 @@ import java.util.List;
 public class UsuarioServicesImpl implements IUsuarioServices {
 
     private final UsuarioRepository usuarioRepository;
-    private final RoleRepository roleRepository;
     private final UsuarioMapper mapper;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UsuarioFactory usuarioFactory;
 
     @Override
     public UsuarioResponseDTO crearUsuario(UsuarioRequestDTO dto) {
-        if(usuarioRepository.findByCorreo(dto.getCorreo()).isPresent()){
-            throw new RuntimeException("Usuario Ya existe");
-        }
-        Role rol = roleRepository.findById(dto.getIdRol())
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
-        Usuario usuario = new Usuario();
-        usuario.setCorreo(dto.getCorreo());
-        usuario.setClave(bCryptPasswordEncoder.encode(dto.getClave()) );
-        usuario.setRol(rol);
+        Usuario usuario = usuarioFactory.crearAdminDesdeRegistro(dto, RoleEnum.ADMIN.toString());
 
         Usuario guardado = usuarioRepository.save(usuario);
 

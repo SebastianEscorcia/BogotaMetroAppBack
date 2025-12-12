@@ -13,6 +13,7 @@ public class PuntoInteresRequestDTO {
     private Long idEstacion;
     private String nombre;
     private String categoria;
+    private String descripcion;
     private BigDecimal latitud;
     private BigDecimal longitud;
 }

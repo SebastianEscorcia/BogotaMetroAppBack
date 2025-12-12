@@ -3,6 +3,7 @@ package com.sena.BogotaMetroApp.services.transaccion;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionResponseDTO;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface ITransaccionService {
     List<TransaccionResponseDTO> obtenerTransaccionesPorFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
     List<TransaccionResponseDTO> obtenerTransaccionesPorUsuarioYFechas(Long idUsuario, LocalDateTime fechaInicio, LocalDateTime fechaFin);
+
+    List<TransaccionResponseDTO> obtenerTransaccionesAvanzadas(Long idUsuario, LocalDateTime inicio, LocalDateTime fin, BigDecimal min, BigDecimal max);
 }
