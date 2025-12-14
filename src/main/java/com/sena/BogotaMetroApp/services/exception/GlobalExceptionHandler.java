@@ -2,6 +2,7 @@ package com.sena.BogotaMetroApp.services.exception;
 
 
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
+import com.sena.BogotaMetroApp.services.exception.auth.AuthException;
 import com.sena.BogotaMetroApp.services.exception.chat.ChatException;
 import com.sena.BogotaMetroApp.services.exception.horariosistema.HorarioSistemaException;
 import com.sena.BogotaMetroApp.services.exception.interrupcion.InterrupcionException;
@@ -164,6 +165,14 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(error, status);
+    }
+
+    /* --- Excepciones de Autenticación --- */
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<ErrorResponse> handleAuthException(AuthException ex) {
+        log.warn("Error Auth: {}", ex.getDescription());
+        HttpStatus status = ex.getCode().contains("NOT_FOUND") ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return buildErrorResponse(ex.getCode(), ex.getDescription(), status);
     }
 
 

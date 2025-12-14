@@ -79,7 +79,14 @@ public enum ErrorCodeEnum implements ErrorCode {
     CHAT_CERRADO("CHAT_CLOSED", "No se pueden enviar mensajes a una sesión cerrada"),
     CHAT_ACCESO_DENEGADO("CHAT_FORBIDDEN", "Acceso denegado: Usted no es un participante activo de este chat"),
     CHAT_REMITENTE_NOT_FOUND("CHAT_USER_NOT_FOUND", "El usuario remitente no existe"),
-    CHAT_SOPORTE_INVALIDO("CHAT_SUPPORT_INVALID", "El usuario asignado no tiene rol de SOPORTE");
+    CHAT_SOPORTE_INVALIDO("CHAT_SUPPORT_INVALID", "El usuario asignado no tiene rol de SOPORTE"),
+
+    // Autenticación y Recuperación Errors
+    AUTH_TOKEN_INVALID("AUTH_TOKEN_INVALID", "Token de recuperación inválido o no encontrado"),
+    AUTH_TOKEN_EXPIRED("AUTH_TOKEN_EXPIRED", "El enlace de recuperación ha expirado"),
+    AUTH_CORREO_NOT_FOUND("AUTH_CORREO_NOT_FOUND", "Correo no encontrado en el sistema"),
+    AUTH_CREDENCIALES_INVALIDAS("AUTH_CREDENCIALES", "Credenciales inválidas"),
+    AUTH_USUARIO_INACTIVO("AUTH_INACTIVO", "El usuario está inactivo");
 
     private final String code;
     private final String description;

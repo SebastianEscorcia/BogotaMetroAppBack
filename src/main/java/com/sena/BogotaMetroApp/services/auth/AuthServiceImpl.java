@@ -1,19 +1,23 @@
 package com.sena.BogotaMetroApp.services.auth;
 
+import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.persistence.models.PasswordResetToken;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.repository.PasswordResetTokenRepository;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.presentation.dto.login.AuthResponse;
 import com.sena.BogotaMetroApp.presentation.dto.login.LoginRequest;
-import com.sena.BogotaMetroApp.services.EmailService;
+import com.sena.BogotaMetroApp.externalservices.email.TurboSMTPEmailService;
 import com.sena.BogotaMetroApp.services.JwtServices;
+import com.sena.BogotaMetroApp.services.exception.auth.AuthException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,19 +27,19 @@ public class AuthServiceImpl implements IAuthService {
     private final PasswordResetTokenRepository tokenRepository;
     private final JwtServices jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final TurboSMTPEmailService emailService;
 
     @Override
     public AuthResponse login(LoginRequest request) {
         Usuario usuario = usuarioRepository.findByCorreo(request.getCorreo())
-                .orElseThrow(() -> new BadCredentialsException("Credenciales inválidas"));
+                .orElseThrow(() -> new AuthException(ErrorCodeEnum.AUTH_CREDENCIALES_INVALIDAS));
 
         if (!usuario.isEnabled()) {
-            throw new BadCredentialsException("El usuario está inactivo");
+            throw new AuthException(ErrorCodeEnum.AUTH_USUARIO_INACTIVO);
         }
 
         if (!passwordEncoder.matches(request.getClave(), usuario.getClave())) {
-            throw new BadCredentialsException("Credenciales inválidas");
+            throw new AuthException(ErrorCodeEnum.AUTH_CREDENCIALES_INVALIDAS);
         }
 
         String token = jwtService.generateToken(usuario);
@@ -52,24 +56,26 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     @Transactional
     public void solicitarRecuperacion(String correo) {
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new RuntimeException("Si el correo existe, se enviará un enlace."));
-        tokenRepository.deleteByUsuario(usuario);
-        PasswordResetToken token = new PasswordResetToken(usuario);
-        tokenRepository.save(token);
-        emailService.enviarEmailRecuperacion(usuario.getCorreo(), token.getToken());
+        usuarioRepository.findByCorreo(correo).ifPresent(usuario -> {
+            tokenRepository.deleteByUsuario(usuario);
+            PasswordResetToken token = new PasswordResetToken(usuario);
+            tokenRepository.save(token);
+            emailService.enviarEmailRecuperacion(usuario.getCorreo(), token.getToken());
+        });
     }
 
     @Override
     @Transactional
     public void cambiarClave(String token, String nuevaClave) {
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token inválido o no encontrado"));
+                .orElseThrow(() -> new AuthException(ErrorCodeEnum.AUTH_TOKEN_INVALID));
+
 
         if (resetToken.estaExpirado()) {
             tokenRepository.delete(resetToken);
-            throw new RuntimeException("El enlace de recuperación ha expirado");
+            throw new AuthException(ErrorCodeEnum.AUTH_TOKEN_EXPIRED);
         }
+
 
         Usuario usuario = resetToken.getUsuario();
         usuario.setClave(passwordEncoder.encode(nuevaClave));
