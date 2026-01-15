@@ -29,7 +29,7 @@ public class SupportFaqController {
         SupportFaqResponseDTO response = supportFaqService.getSupportFaqById(id);
         return ResponseEntity.ok(response);
     }
-
+    @PreAuthorize("hasRole('PASAJERO')")
     @GetMapping
     public ResponseEntity<List<SupportFaqResponseDTO>> getAllActiveSupportFaqs() {
         List<SupportFaqResponseDTO> response = supportFaqService.getAllActiveSupportFaqs();
