@@ -34,8 +34,7 @@ public class TurboSMTPEmailService implements IEmailService {
 
     @Value("${turbosmtp.from.name}")
     private String fromName;
-
-    @Value("${app.frontend.url:http://127.0.0.1:3000/reset.html}")
+    @Value("${app.frontend.url:http://localhost:5173/reset-password}")
     private String frontendUrl;
 
 
