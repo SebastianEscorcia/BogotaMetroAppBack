@@ -84,6 +84,7 @@ public enum ErrorCodeEnum implements ErrorCode {
     // Autenticación y Recuperación Errors
     AUTH_TOKEN_INVALID("AUTH_TOKEN_INVALID", "Token de recuperación inválido o no encontrado"),
     AUTH_TOKEN_EXPIRED("AUTH_TOKEN_EXPIRED", "El enlace de recuperación ha expirado"),
+    AUTH_TOKEN_GENERATION_ERROR("AUTH_TOKEN_GEN_ERROR", "Error al generar el token de recuperación. Intente nuevamente"),
     AUTH_CORREO_NOT_FOUND("AUTH_CORREO_NOT_FOUND", "Correo no encontrado en el sistema"),
     AUTH_CREDENCIALES_INVALIDAS("AUTH_CREDENCIALES", "Credenciales inválidas"),
     AUTH_USUARIO_INACTIVO("AUTH_INACTIVO", "El usuario está inactivo");

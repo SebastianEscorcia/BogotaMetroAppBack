@@ -12,6 +12,7 @@ import com.sena.BogotaMetroApp.services.JwtServices;
 import com.sena.BogotaMetroApp.services.exception.auth.AuthException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements IAuthService {
 
     private final UsuarioRepository usuarioRepository;
@@ -56,12 +58,19 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     @Transactional
     public void solicitarRecuperacion(String correo) {
-        usuarioRepository.findByCorreo(correo).ifPresent(usuario -> {
-            tokenRepository.deleteByUsuario(usuario);
-            PasswordResetToken token = new PasswordResetToken(usuario);
-            tokenRepository.save(token);
-            emailService.enviarEmailRecuperacion(usuario.getCorreo(), token.getToken());
-        });
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(correo);
+        if (usuarioOpt.isEmpty()) {
+            log.info("Solicitud de recuperación de contraseña para correo no registrado: {}", correo);
+            return;
+        }
+        Usuario usuario = usuarioOpt.get();
+        tokenRepository.deleteByUsuario(usuario);
+        tokenRepository.flush();
+
+        PasswordResetToken token = new PasswordResetToken(usuario);
+        tokenRepository.save(token);
+
+        emailService.enviarEmailRecuperacion(usuario.getCorreo(), token.getToken());
     }
 
     @Override

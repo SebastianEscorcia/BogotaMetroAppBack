@@ -15,6 +15,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -90,6 +91,16 @@ public class GlobalExceptionHandler {
                 ErrorCodeEnum.VALIDATION_ERROR.getCode(),
                 msg,
                 HttpStatus.BAD_REQUEST
+        );
+    }
+    /* --- Excepciones de Integridad de Datos --- */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.error("Error de integridad de datos: {}", ex.getMessage());
+        return buildErrorResponse(
+                ErrorCodeEnum.INTERNAL_ERROR.getCode(),
+                "Error de integridad de datos. Por favor, intente nuevamente.",
+                HttpStatus.CONFLICT
         );
     }
 
