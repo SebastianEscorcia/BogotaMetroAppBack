@@ -18,6 +18,6 @@ public class PasajeroResponseDTO {
     private String telefono;
     private TipoDocumentoEnum tipoDocumento;
     private String numDocumento;
-
+    private String numTarjetaVirtual;
     private BigDecimal saldo;
 }

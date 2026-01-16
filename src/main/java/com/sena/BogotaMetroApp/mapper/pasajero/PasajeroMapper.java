@@ -23,6 +23,7 @@ public class PasajeroMapper {
         if (p.getTarjetaVirtual() != null) {
             dto.setIdTarjetaVirtual(p.getTarjetaVirtual().getIdTarjeta());
             dto.setSaldo(p.getTarjetaVirtual().getSaldo());
+            dto.setNumTarjetaVirtual(p.getTarjetaVirtual().getNumeroTarjeta());
 
         }else{
             dto.setSaldo(BigDecimal.ZERO);
