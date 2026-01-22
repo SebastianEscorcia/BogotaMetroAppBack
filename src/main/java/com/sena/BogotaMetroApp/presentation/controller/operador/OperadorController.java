@@ -44,6 +44,13 @@ public class OperadorController {
         operadorService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("me")
+    @PreAuthorize("hasRole('OPERADOR')")
+    public ResponseEntity<OperadorResponseDTO> obtenerMisDatos() {
+        String correoAutenticado = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(operadorService.obtenerPorCorreo(correoAutenticado));
+
+    }
 
     @PatchMapping("/{id}/reactivar")
     public ResponseEntity<Void> reactivar(@PathVariable Long id) {

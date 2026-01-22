@@ -29,7 +29,6 @@ public class OperadorMapper {
 
         Operador operador = new Operador();
         operador.setUsuario(usuario);
-        usuario.setOperador(operador);
 
         return operador;
     }

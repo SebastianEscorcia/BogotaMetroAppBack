@@ -1,6 +1,7 @@
 package com.sena.BogotaMetroApp.services.qr;
 
-import com.sena.BogotaMetroApp.externalservices.RedisCacheService;
+import com.sena.BogotaMetroApp.externalservices.cache.IQrCacheService;
+import com.sena.BogotaMetroApp.externalservices.cache.QrRedisQrCacheServiceImpl;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.presentation.dto.QrCacheDTO;
@@ -31,7 +32,7 @@ public class QrServiceImpl implements IQrService {
     private final QrMapper qrMapper;
     private final QrValidator qrValidator;
     private final IQrNoUsadoService qrNoUsadoService;
-    private final RedisCacheService redisCacheService;
+    private final IQrCacheService<QrCacheDTO, Long> qrCacheService;
     private static final int MINUTOS_EXPIRACION = 15;
 
 
@@ -99,7 +100,10 @@ public class QrServiceImpl implements IQrService {
             dto.setUsuarioId(qr.getUsuario().getId());
             dto.setContenido(qr.getContenidoQr());
 
-            redisCacheService.invalidate(dto);
+            qrCacheService.invalidate(dto.getUsuarioId());
+            if(qrCacheService instanceof QrRedisQrCacheServiceImpl impl){
+                impl.invalidateByCodigo(dto.getContenido());
+            }
             return qr;
         }
 
@@ -114,26 +118,32 @@ public class QrServiceImpl implements IQrService {
         dto.setUsuarioId(saved.getUsuario().getId());
         dto.setContenido(saved.getContenidoQr());
 
-        redisCacheService.invalidate(dto);
+        qrCacheService.invalidate(dto.getUsuarioId());
 
         return saved;
     }
 
 
     private QrResponseDTO obtenerDesdeCache(Long usuarioId, LocalDateTime ahora) {
-        QrCacheDTO cache = redisCacheService.getQrUsuario(usuarioId);
+        Optional<QrCacheDTO> cacheOpt = qrCacheService.get(usuarioId);
 
-        if (cache == null) {
+        if (cacheOpt.isEmpty()) {
             return null;
         }
 
+        QrCacheDTO cache = cacheOpt.get();
         boolean esValido = cache.getFechaExpiracion().isAfter(ahora) && !cache.isConsumido();
 
         if (esValido) {
             return qrMapper.toDTOFromCache(cache);
         }
 
-        redisCacheService.invalidate(cache);
+        // Cache inválido, invalidar
+        qrCacheService.invalidate(usuarioId);
+        if (cache.getContenido() != null) {
+            qrCacheService.invalidateFull(cache);
+        }
+
         return null;
     }
 
@@ -160,7 +170,7 @@ public class QrServiceImpl implements IQrService {
     }
 
     private QrResponseDTO cachearYRetornar(Qr qr) {
-        redisCacheService.cacheQr(qrMapper.toCacheDTO(qr));
+        qrCacheService.cache(qrMapper.toCacheDTO(qr));
         return qrMapper.toDTO(qr);
     }
 
@@ -175,5 +185,7 @@ public class QrServiceImpl implements IQrService {
 
         return qrRepository.save(qr);
     }
-
+    private void invalidarCacheQr(Qr qr) {
+        qrCacheService.invalidateFull(qrMapper.toCacheDTO(qr));
+    }
 }

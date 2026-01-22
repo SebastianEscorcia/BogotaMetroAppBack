@@ -17,7 +17,7 @@ public class Soporte {
     @Column(name = "id_usuario")
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch =  FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;

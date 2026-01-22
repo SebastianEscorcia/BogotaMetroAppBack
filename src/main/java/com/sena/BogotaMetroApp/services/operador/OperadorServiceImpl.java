@@ -75,6 +75,16 @@ public class OperadorServiceImpl implements IOperadorService {
     }
 
     @Override
+    public OperadorResponseDTO obtenerPorCorreo(String correo) {
+        Operador operador = operadorRepository.findByUsuarioCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Operador no encontrado con el correo: " + correo));
+        if(!operador.getUsuario().isActivo()){
+            throw new RuntimeException("El operador está inactivo");
+        }
+        return mapper.toDTO(operador);
+    }
+
+    @Override
     public void reactivar(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));

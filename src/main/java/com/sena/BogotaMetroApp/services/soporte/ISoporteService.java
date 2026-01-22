@@ -11,5 +11,6 @@ public interface ISoporteService {
     List<SoporteResponseDTO> listarSoportes(String busqueda);
     SoporteResponseDTO obtenerPorId(Long id);
     SoporteResponseDTO actualizar(Long id, SoporteUpdateDTO dto);
+    SoporteResponseDTO obtenerPorCorreo(String correo);
     void eliminar(Long id);
 }

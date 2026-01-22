@@ -30,6 +30,12 @@ public class SoporteController {
     public ResponseEntity<List<SoporteResponseDTO>> listar(@RequestParam(required = false) String busqueda) {
         return ResponseEntity.ok(soporteService.listarSoportes(busqueda));
     }
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('SOPORTE')")
+    public ResponseEntity<SoporteResponseDTO> me() {
+        String correoAutenticado = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok(soporteService.obtenerPorCorreo(correoAutenticado));
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<SoporteResponseDTO> obtener(@PathVariable Long id) {

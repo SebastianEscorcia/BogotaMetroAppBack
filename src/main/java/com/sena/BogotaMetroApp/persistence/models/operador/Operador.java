@@ -16,7 +16,7 @@ public class Operador implements Persistable<Long> {
     @Column(name = "id_usuario")
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;

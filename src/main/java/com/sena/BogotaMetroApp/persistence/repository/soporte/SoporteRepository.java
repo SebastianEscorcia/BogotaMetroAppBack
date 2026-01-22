@@ -7,9 +7,35 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SoporteRepository extends JpaRepository<Soporte, Long> {
+
+    @Query("""
+        SELECT s FROM Soporte s
+        JOIN FETCH s.usuario u
+        JOIN FETCH u.datosPersonales
+        JOIN FETCH u.rol
+        WHERE u.correo = :correo AND u.activo = true
+        """)
+    Optional<Soporte> findByUsuarioCorreo(@Param("correo") String correo);
+
+    @Query("""
+        SELECT s FROM Soporte s
+        JOIN FETCH s.usuario u
+        JOIN FETCH u.datosPersonales
+        JOIN FETCH u.rol
+        WHERE s.id = :id AND u.activo = true
+        """)
+    Optional<Soporte> findByIdWithFullData(@Param("id") Long id);
+    @Query("""
+        SELECT s FROM Soporte s
+        JOIN FETCH s.usuario u
+        JOIN FETCH u.datosPersonales
+        WHERE u.activo = true
+        """)
+    List<Soporte> findAllActive();
 
     @Query("SELECT s FROM Soporte s " +
             "JOIN s.usuario u " +
