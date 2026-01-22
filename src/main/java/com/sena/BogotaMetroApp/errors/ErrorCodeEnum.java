@@ -31,7 +31,7 @@ public enum ErrorCodeEnum implements ErrorCode {
     PASAJERO_USUARIO_NO_EXISTE("PAS-404", "El usuario no existe"),
     PASAJERO_YA_EXISTE("PAS-409", "El usuario ya está registrado "),
     PASAJERO_NO_ENCONTRADO("PAS-404B", "Pasajero no encontrado"),
-
+    PASAJERO_INACTIVO("PAS-403", "El pasajero está inactivo"),
     //Pasarela Errors
     PASARELA_NOT_FOUND("PASARELA_NOT_FOUND", "Pasarela de pago no encontrada"),
     PASARELA_INACTIVA("PASARELA_INACTIVA", "La pasarela de pago está inactiva"),

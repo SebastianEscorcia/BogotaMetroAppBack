@@ -35,7 +35,7 @@ public class TarjetaVirtual {
     private LocalDate fechaCreacion;
 
     // RELACIÓN: Una tarjeta le pertenece a un pasajero.
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pasajeroFK", nullable = false, unique = true)
     private Pasajero pasajero;
 

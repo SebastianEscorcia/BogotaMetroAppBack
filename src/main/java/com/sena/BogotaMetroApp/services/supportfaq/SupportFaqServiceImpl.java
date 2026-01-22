@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.services.supportfaq;
 
+import com.sena.BogotaMetroApp.externalservices.cache.ISupportFaqCacheService;
 import com.sena.BogotaMetroApp.mapper.supportfaq.SupportFaqMapper;
 import com.sena.BogotaMetroApp.persistence.models.supportfaq.CategoryFaq;
 import com.sena.BogotaMetroApp.persistence.models.supportfaq.SupportFaq;
@@ -9,6 +10,7 @@ import com.sena.BogotaMetroApp.presentation.dto.supportfaq.SupportFaqRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.supportfaq.SupportFaqResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +19,13 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class SupportFaqServiceImpl implements ISupportFaqService {
     private final SupportFaqMapper supportFaqMapper;
     private final SupportFaqRepository supportFaqRepository;
     private final CategoryFaqRepository categoryFaqRepository;
+    private  final ISupportFaqCacheService supportFaqCache;
 
     @Override
     @Transactional
@@ -32,6 +36,7 @@ public class SupportFaqServiceImpl implements ISupportFaqService {
         supportFaq.setCategoryFaq(categoryFaq);
         supportFaq.setActive(true);
         SupportFaq saved = supportFaqRepository.save(supportFaq);
+        supportFaqCache.invalidateSupportFaqsCache();
         return supportFaqMapper.toDTO(saved);
     }
 
@@ -47,19 +52,40 @@ public class SupportFaqServiceImpl implements ISupportFaqService {
     @Override
     @Transactional(readOnly = true)
     public List<SupportFaqResponseDTO> getAllActiveSupportFaqs() {
-        return supportFaqRepository.findAllByIsActiveTrue()
-                .stream()
-                .map(supportFaqMapper::toDTO)
-                .collect(Collectors.toList());
+        return supportFaqCache.getCachedSupportFaqs()
+                .orElseGet(() -> {
+                    // 2. Cache miss - consultar DB
+                    log.info("Cache miss - consultando Support FAQs desde DB");
+                    List<SupportFaqResponseDTO> faqs = supportFaqRepository.findAllByIsActiveTrue()
+                            .stream()
+                            .map(supportFaqMapper::toDTO)
+                            .collect(Collectors.toList());
+
+                    // 3. Guardar en cache
+                    supportFaqCache.cacheSupportFaqs(faqs);
+
+                    return faqs;
+                });
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<SupportFaqResponseDTO> getSupportFaqsByCategoryId(Long categoryId) {
-        return supportFaqRepository.findAllByCategoryFaqIdAndIsActiveTrue(categoryId)
-                .stream()
-                .map(supportFaqMapper::toDTO)
-                .collect(Collectors.toList());
+        // 1. Intentar obtener desde cache
+        return supportFaqCache.getCachedSupportFaqsByCategory(categoryId)
+                .orElseGet(() -> {
+                    // 2. Cache miss - consultar DB
+                    log.info("Cache miss - consultando Support FAQs por categoría {} desde DB", categoryId);
+                    List<SupportFaqResponseDTO> faqs = supportFaqRepository.findAllByCategoryFaqIdAndIsActiveTrue(categoryId)
+                            .stream()
+                            .map(supportFaqMapper::toDTO)
+                            .collect(Collectors.toList());
+
+                    // 3. Guardar en cache
+                    supportFaqCache.cacheSupportFaqsByCategory(categoryId, faqs);
+
+                    return faqs;
+                });
     }
 
     @Override
@@ -77,6 +103,8 @@ public class SupportFaqServiceImpl implements ISupportFaqService {
         supportFaq.setAnswer(dto.getAnswer());
 
         SupportFaq updated = supportFaqRepository.save(supportFaq);
+        supportFaqCache.invalidateSupportFaqsCache();
+
         return supportFaqMapper.toDTO(updated);
     }
 
@@ -89,5 +117,6 @@ public class SupportFaqServiceImpl implements ISupportFaqService {
 
         supportFaq.setActive(false);
         supportFaqRepository.save(supportFaq);
+        supportFaqCache.invalidateSupportFaqsCache();
     }
 }

@@ -1,8 +1,8 @@
-package com.sena.BogotaMetroApp.externalservices;
+package com.sena.BogotaMetroApp.externalservices.cache;
 
 import com.sena.BogotaMetroApp.presentation.dto.QrCacheDTO;
+import com.sena.BogotaMetroApp.utils.RedisCacheConstants;
 import com.sena.BogotaMetroApp.utils.enums.TipoQr;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -14,16 +14,10 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class RedisCacheService {
+public class QrRedisQrCacheServiceImpl extends AbstractRedisCacheService  implements IQrCacheService<QrCacheDTO,Long> {
 
-    private final RedisTemplate<String, String> redisTemplate;
 
-    private static final String USER_QR_KEY = "usuario:%d:qr";
-    private static final String QR_KEY = "qr:%s";
-
-    // Script Lua para realizar un HMSET condicional basado en la versión para 8 campos (16 argumentos field/value + 1 version)
     private static final String LUA_CAS_HMSET =
             "local existing = redis.call('HGET', KEYS[1], 'version') " +
                     "if (not existing) or (tonumber(ARGV[1]) > tonumber(existing)) then " +
@@ -34,7 +28,12 @@ public class RedisCacheService {
                     "end " +
                     "return 0";
 
-    private final DefaultRedisScript<Long> casScript = createScript();
+    private final DefaultRedisScript<Long> casScript;
+
+    public QrRedisQrCacheServiceImpl(RedisTemplate<String, String> redisTemplate) {
+        super(redisTemplate);
+        this.casScript = createScript();
+    }
 
     private DefaultRedisScript<Long> createScript() {
         DefaultRedisScript<Long> script = new DefaultRedisScript<>();
@@ -43,15 +42,8 @@ public class RedisCacheService {
         return script;
     }
 
-    private String userKey(Long usuarioId) {
-        return String.format(USER_QR_KEY, usuarioId);
-    }
-
-    private String qrKey(String codigo) {
-        return String.format(QR_KEY, codigo);
-    }
-
-    public void cacheQr(QrCacheDTO dto) {
+    @Override
+    public void cache(QrCacheDTO dto) {
         if (dto == null || dto.getFechaExpiracion() == null) {
             log.warn("No se puede cachear QR: dto es null o fechaExpiracion es null");
             return;
@@ -67,9 +59,19 @@ public class RedisCacheService {
         }
 
         long incomingVersion = Math.max(1, dto.getVersion());
+        List<String> args = buildCacheArgs(dto, incomingVersion);
 
-        List<String> args = Arrays.asList(
-                String.valueOf(incomingVersion),
+        try {
+            cacheByUserKey(dto, args, ttl, incomingVersion);
+            cacheByQrCode(dto, args, ttl);
+        } catch (Exception e) {
+            log.error("Error cacheando QR en Redis: {}", e.getMessage(), e);
+        }
+    }
+
+    private List<String> buildCacheArgs(QrCacheDTO dto, long version) {
+        return Arrays.asList(
+                String.valueOf(version),
                 "id", dto.getId() == null ? "" : dto.getId().toString(),
                 "usuarioId", dto.getUsuarioId() == null ? "" : dto.getUsuarioId().toString(),
                 "codigo", dto.getContenido() == null ? "" : dto.getContenido(),
@@ -77,90 +79,108 @@ public class RedisCacheService {
                 "fechaGeneracion", dto.getFechaGeneracion() == null ? "" : dto.getFechaGeneracion().toString(),
                 "fechaExpiracion", dto.getFechaExpiracion().toString(),
                 "consumido", String.valueOf(dto.isConsumido()),
-                "version", String.valueOf(incomingVersion)
+                "version", String.valueOf(version)
         );
+    }
 
-        try {
-            String userKey = userKey(dto.getUsuarioId());
-            Long resUser = redisTemplate.execute(casScript, Collections.singletonList(userKey), (Object[]) args.toArray(new String[0]));
-            log.info("Resultado cache userKey [{}]: {}", userKey, resUser);
+    private void cacheByUserKey(QrCacheDTO dto, List<String> args, long ttl, long version) {
+        String userKey = RedisCacheConstants.userQrKey(dto.getUsuarioId());
+        Long result = redisTemplate.execute(casScript, Collections.singletonList(userKey),
+                (Object[]) args.toArray(new String[0]));
+        log.info("Resultado cache userKey [{}]: {}", userKey, result);
 
-            if (resUser != null && resUser == 1L) {
-                redisTemplate.expire(userKey, ttl, TimeUnit.SECONDS);
-                log.info("TTL aplicado a userKey: {} segundos", ttl);
-            }
-
-            String qrKey = qrKey(dto.getContenido());
-            Long resQr = redisTemplate.execute(casScript, Collections.singletonList(qrKey), (Object[]) args.toArray(new String[0]));
-            log.info("Resultado cache qrKey [{}]: {}", qrKey, resQr);
-
-            if (resQr != null && resQr == 1L) {
-                redisTemplate.expire(qrKey, ttl, TimeUnit.SECONDS);
-                log.info("TTL aplicado a qrKey: {} segundos", ttl);
-            }
-
-        } catch (Exception e) {
-            log.error("Error cacheando QR en Redis: {}", e.getMessage(), e);
+        if (result == 1L) {
+            redisTemplate.expire(userKey, ttl, TimeUnit.SECONDS);
+            log.info("TTL aplicado a userKey: {} segundos", ttl);
         }
     }
 
-    public QrCacheDTO getQrUsuario(Long usuarioId) {
+    private void cacheByQrCode(QrCacheDTO dto, List<String> args, long ttl) {
+        String qrKey = RedisCacheConstants.qrCodeKey(dto.getContenido());
+        Long result = redisTemplate.execute(casScript, Collections.singletonList(qrKey),
+                (Object[]) args.toArray(new String[0]));
+        log.info("Resultado cache qrKey [{}]: {}", qrKey, result);
+
+        if (result == 1L) {
+            redisTemplate.expire(qrKey, ttl, TimeUnit.SECONDS);
+            log.info("TTL aplicado a qrKey: {} segundos", ttl);
+        }
+    }
+
+    @Override
+    public Optional<QrCacheDTO> get(Long usuarioId) {
         try {
-            String key = userKey(usuarioId);
+            String key = RedisCacheConstants.userQrKey(usuarioId);
             log.info("Buscando en Redis key: {}", key);
 
             Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
 
-            if (entries == null || entries.isEmpty()) {
+            if (entries.isEmpty()) {
                 log.info("No se encontró cache para key: {}", key);
-                return null;
+                return Optional.empty();
             }
 
-            log.info("Cache encontrado para key: {}, entries: {}", key, entries);
-            return mapFromHash(entries);
+            log.info("Cache encontrado para key: {}", key);
+            return Optional.of(mapFromHash(entries));
         } catch (Exception e) {
             log.error("Error leyendo cache de Redis: {}", e.getMessage(), e);
-            return null;
+            return Optional.empty();
         }
     }
 
-    // ...existing code para los demás métodos...
-
-    public QrCacheDTO getQrByCodigo(String codigo) {
+    /**
+     * Obtiene QR por código
+     */
+    public Optional<QrCacheDTO> getByCodigo(String codigo) {
         try {
-            String key = qrKey(codigo);
+            String key = RedisCacheConstants.qrCodeKey(codigo);
             Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
-            if (entries == null || entries.isEmpty()) return null;
-            return mapFromHash(entries);
+            if (entries.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(mapFromHash(entries));
         } catch (Exception e) {
-            return null;
+            log.error("Error obteniendo QR por código: {}", e.getMessage());
+            return Optional.empty();
         }
     }
 
-    public void invalidateByUsuarioId(Long usuarioId) {
-        try {
-            String key = userKey(usuarioId);
-            Boolean deleted = redisTemplate.delete(key);
-            log.info("Invalidando cache userKey [{}]: {}", key, deleted);
-        } catch (Exception e) {
-            log.error("Error invalidando cache: {}", e.getMessage());
-        }
+    @Override
+    public void invalidate(Long usuarioId) {
+        String key = RedisCacheConstants.userQrKey(usuarioId);
+        deleteKey(key);
     }
 
+    /**
+     * Invalida por código
+     */
     public void invalidateByCodigo(String codigo) {
-        try {
-            String key = qrKey(codigo);
-            Boolean deleted = redisTemplate.delete(key);
-            log.info("Invalidando cache qrKey [{}]: {}", key, deleted);
-        } catch (Exception e) {
-            log.error("Error invalidando cache: {}", e.getMessage());
+        String key = RedisCacheConstants.qrCodeKey(codigo);
+        deleteKey(key);
+    }
+
+
+    /**
+     * Invalida completamente un QR (por usuario y código)
+     */
+    @Override
+    public void invalidateFull(QrCacheDTO dto) {
+        if (dto == null) return;
+        invalidate(dto.getUsuarioId());
+        if (dto.getContenido() != null) {
+            invalidateByCodigo(dto.getContenido());
         }
     }
 
-    public void invalidate(QrCacheDTO dto) {
-        if (dto == null) return;
-        invalidateByUsuarioId(dto.getUsuarioId());
-        if (dto.getContenido() != null) invalidateByCodigo(dto.getContenido());
+    @Override
+    public void invalidateAll() {
+        deleteByPattern("usuario:*:qr");
+        deleteByPattern("qr:*");
+    }
+
+    @Override
+    public boolean exists(Long usuarioId) {
+        return keyExists(RedisCacheConstants.userQrKey(usuarioId));
     }
 
     private QrCacheDTO mapFromHash(Map<Object, Object> h) {

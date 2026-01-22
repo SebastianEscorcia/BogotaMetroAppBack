@@ -11,6 +11,6 @@ public interface IOperadorService {
     OperadorResponseDTO actualizar(Long id, RegistroOperadorDTO dto); // Reusamos el DTO o crea uno UpdateDTO
     void eliminar(Long id);
     OperadorResponseDTO obtenerPorId(Long id);
-
+    OperadorResponseDTO obtenerPorCorreo(String correo);
     void reactivar(Long id);
 }

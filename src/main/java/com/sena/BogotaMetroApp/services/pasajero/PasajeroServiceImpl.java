@@ -55,27 +55,25 @@ public class PasajeroServiceImpl implements IPasajeroService {
 
 
         Pasajero pasajero = pasajeroFactory.crear(usuario);
-        usuario.setPasajero(pasajero);
 
 
         TarjetaVirtual nuevaTarjeta = tarjetaVirtualFactory.crearTarjetaVirtual(pasajero);
         pasajero.setTarjetaVirtual(nuevaTarjeta);
 
-        usuario = usuarioRepository.save(usuario);
+        pasajeroRepository.save(pasajero);
 
-        return mapper.toDTO(usuario.getPasajero());
+        return mapper.toDTO(pasajero);
     }
 
     @Override
     public PasajeroResponseDTO obtenerPorCorreo(String correo) {
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
+        Pasajero pasajero = pasajeroRepository.findByUsuarioCorreo(correo)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el correo: " + correo));
 
-        if (usuario.getPasajero() == null) {
-            throw new PasajeroException(ErrorCodeEnum.PASAJERO_NO_ENCONTRADO);
+        if(!pasajero.getUsuario().isActivo()){
+            throw new PasajeroException(ErrorCodeEnum.PASAJERO_INACTIVO);
         }
-
-        return mapper.toDTO(usuario.getPasajero());
+        return mapper.toDTO(pasajero);
     }
 
     @Override
@@ -99,10 +97,10 @@ public class PasajeroServiceImpl implements IPasajeroService {
     public void eliminar(Long id) {
         Pasajero p = pasajeroRepository.findById(id).orElseThrow(() -> new PasajeroException(ErrorCodeEnum.PASAJERO_NO_ENCONTRADO));
         Usuario usuario = p.getUsuario();
-        if (usuario != null) {
-            usuario.setPasajero(null);
-        }
         pasajeroRepository.delete(p);
+        if (usuario != null) {
+            usuarioRepository.delete(usuario);
+        }
     }
 
     @Override

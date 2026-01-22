@@ -38,7 +38,6 @@ public class SoporteMapper {
         soporte.setUltimoAcceso(LocalDateTime.now());
 
         soporte.setUsuario(usuario);
-        usuario.setSoporte(soporte);
 
         return soporte;
 

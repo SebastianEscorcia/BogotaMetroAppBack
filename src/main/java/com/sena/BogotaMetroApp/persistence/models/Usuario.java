@@ -1,8 +1,5 @@
 package com.sena.BogotaMetroApp.persistence.models;
 
-import com.sena.BogotaMetroApp.persistence.models.operador.Operador;
-import com.sena.BogotaMetroApp.persistence.models.pasajero.Pasajero;
-import com.sena.BogotaMetroApp.persistence.models.soporte.Soporte;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,15 +37,6 @@ public class Usuario implements UserDetails {
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
     private DatosPersonales datosPersonales;
-
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private Pasajero pasajero;
-
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private Operador operador;
-
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private Soporte soporte;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

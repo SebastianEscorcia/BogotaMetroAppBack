@@ -82,6 +82,18 @@ public class SoporteServiceImpl implements ISoporteService {
     }
 
     @Override
+    public SoporteResponseDTO obtenerPorCorreo(String correo) {
+        Soporte soporte = soporteRepository.findByUsuarioCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario de Soporte no encontrado"));
+
+        if (!soporte.getUsuario().isActivo()) {
+            throw new RuntimeException("El usuario se encuentra inactivo");
+        }
+
+        return mapper.toDTO(soporte);
+    }
+
+    @Override
     public void eliminar(Long id) {
         Soporte soporte = soporteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario de Soporte no encontrado"));
