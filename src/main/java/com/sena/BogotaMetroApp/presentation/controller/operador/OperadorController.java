@@ -15,10 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("api/operador")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class OperadorController {
     private final IOperadorService operadorService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @PostMapping("/registro")
     public ResponseEntity<@NotNull OperadorResponseDTO> registrar(@Valid @RequestBody RegistroOperadorDTO dto) {
         return ResponseEntity.ok(operadorService.registrar(dto));

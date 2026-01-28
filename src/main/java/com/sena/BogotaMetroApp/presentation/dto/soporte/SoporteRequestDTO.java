@@ -8,5 +8,4 @@ import lombok.Setter;
 @Setter
 public class SoporteRequestDTO extends RegistroUsuarioBaseDTO {
 
-    private Integer estado;
 }

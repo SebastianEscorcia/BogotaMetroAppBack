@@ -41,13 +41,13 @@ public class OperadorMapper {
         if (op.getUsuario() != null) {
             dto.setIdUsuario(op.getUsuario().getId());
             dto.setCorreo(op.getUsuario().getCorreo());
-            var info = usuarioMapper.toUsuarioInfo(op.getUsuario());
-            if (info != null) {
-                dto.setNombreCompleto(info.getNombreCompleto());
-                dto.setTelefono(info.getTelefono());
-                dto.setTipoDocumento(info.getTipoDocumento());
-                dto.setNumDocumento(info.getNumDocumento());
-            }
+            dto.setNombreCompleto(op.getUsuario().getDatosPersonales().getNombreCompleto());
+            dto.setActivo(op.getUsuario().isActivo());
+            dto.setTelefono(op.getUsuario().getDatosPersonales().getTelefono());
+            dto.setTipoDocumento(op.getUsuario().getDatosPersonales().getTipoDocumento());
+            dto.setNumDocumento(op.getUsuario().getDatosPersonales().getNumDocumento());
+
+
         }
 
         return dto;

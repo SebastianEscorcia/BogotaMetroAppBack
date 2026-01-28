@@ -1,6 +1,11 @@
 package com.sena.BogotaMetroApp.errors;
 
 public enum ErrorCodeEnum implements ErrorCode {
+
+    //ROL Erros
+    ROL_NOT_FOUND("ROL_NOT_FOUND", "Rol no encontrado"),
+    ROL_DEACTIVATED("ROL_DEACTIVATED","El rol está desactivado"),
+    ROL_YA_EXISTE("ROL_YA_EXISTE","El rol ya está registrado en el sistema"),
     //QR Errors
     QR_NOT_FOUND("QR_NOT_FOUND", "QR no válido o no encontrado en el sistema"),
     QR_ALREADY_USED("QR_ALREADY_USED", "Este QR ya fue utilizado anteriormente"),

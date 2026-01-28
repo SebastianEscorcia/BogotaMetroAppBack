@@ -12,8 +12,8 @@ public class SoporteResponseDTO {
 
     private Long id;
     private String correo;
-    private Integer estado;
     private LocalDateTime fechaCreacion;
     private LocalDateTime ultimoAcceso;
     private UsuarioInfoDTO usuario;
+    private boolean activo;
 }
