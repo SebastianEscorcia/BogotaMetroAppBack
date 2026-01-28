@@ -32,7 +32,6 @@ public class OperadorServiceImpl implements IOperadorService {
     public OperadorResponseDTO registrar(RegistroOperadorDTO dto) {
         Operador operador = mapper.toEntity(dto);
 
-
         usuarioRepository.save(operador.getUsuario());
         operadorRepository.save(operador);
 

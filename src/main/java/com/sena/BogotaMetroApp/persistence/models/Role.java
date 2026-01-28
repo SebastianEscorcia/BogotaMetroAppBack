@@ -9,7 +9,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "roles")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
@@ -20,7 +21,13 @@ public class Role {
     @Column(name = "nombre_rol", unique = true, nullable = false)
     private String nombre;
 
-    public Role(String nombre) {
+    private Boolean isActive = true;
+
+    public Role(String nombre, Boolean isActive) {
         this.nombre = nombre;
+        this.isActive = isActive;
+    }
+    public boolean isActive (){
+        return  this.isActive;
     }
 }

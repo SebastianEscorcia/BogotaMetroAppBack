@@ -22,7 +22,6 @@ public class Soporte {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
-    private Integer estado;
     private LocalDateTime fechaCreacion;
     private LocalDateTime ultimoAcceso;
 }

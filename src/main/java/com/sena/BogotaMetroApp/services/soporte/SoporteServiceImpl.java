@@ -14,7 +14,6 @@ import com.sena.BogotaMetroApp.presentation.dto.soporte.SoporteUpdateDTO;
 import com.sena.BogotaMetroApp.services.factory.DatosPersonalesFactory;
 import com.sena.BogotaMetroApp.utils.enums.RoleEnum;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +28,6 @@ public class SoporteServiceImpl implements ISoporteService {
     private final SoporteRepository soporteRepository;
     private final DatosPersonalesFactory datosPersonalesFactory;
     private final SoporteMapper mapper;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public SoporteResponseDTO registrar(SoporteRequestDTO dto) {
@@ -41,13 +39,10 @@ public class SoporteServiceImpl implements ISoporteService {
         Role rolSoporte = roleRepository.findByNombre(RoleEnum.SOPORTE.toString())
                 .orElseThrow(() -> new RuntimeException("Rol de soporte no encontrado"));
 
-        String claveEncriptada = passwordEncoder.encode(dto.getClave());
+        Soporte soporte = mapper.toEntity(dto, rolSoporte);
 
-        Soporte soporte = mapper.toEntity(dto, claveEncriptada, rolSoporte);
-
-
+        soporteRepository.save(soporte);
         usuarioRepository.save(soporte.getUsuario());
-
 
         return mapper.toDTO(soporte);
     }

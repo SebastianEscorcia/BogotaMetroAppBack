@@ -15,4 +15,5 @@ public class OperadorResponseDTO {
     private String telefono;
     private TipoDocumentoEnum tipoDocumento;
     private String numDocumento;
+    private boolean activo;
 }

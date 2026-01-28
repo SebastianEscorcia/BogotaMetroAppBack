@@ -9,6 +9,7 @@ import com.sena.BogotaMetroApp.services.exception.interrupcion.InterrupcionExcep
 import com.sena.BogotaMetroApp.services.exception.pago.PagoException;
 import com.sena.BogotaMetroApp.services.exception.pasajero.PasajeroException;
 import com.sena.BogotaMetroApp.services.exception.qr.QrException;
+import com.sena.BogotaMetroApp.services.exception.rol.RolException;
 import com.sena.BogotaMetroApp.services.exception.ruta.RutaException;
 import com.sena.BogotaMetroApp.services.exception.tarifasistema.TarifaSistemaException;
 import jakarta.validation.ConstraintViolation;
@@ -33,6 +34,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(QrException.class)
     public ResponseEntity<ErrorResponse> handleQrException(QrException ex) {
         log.error("Error QR: {}", ex.getMessage());
+        return buildErrorResponse(ex.getCode(), ex.getDescription(), HttpStatus.BAD_REQUEST);
+    }
+    /* --- Excepsiones de Rol --- */
+    @ExceptionHandler(RolException.class)
+    public ResponseEntity<ErrorResponse> handleRolException(RolException ex){
+        log.error("Error ROL: {}",ex.getMessage());
         return buildErrorResponse(ex.getCode(), ex.getDescription(), HttpStatus.BAD_REQUEST);
     }
 

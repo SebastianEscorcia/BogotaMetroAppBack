@@ -24,8 +24,7 @@ public class SoporteMapper {
     private final UsuarioFactory usuarioFactory;
     private final DatosPersonalesFactory datosPersonalesFactory;
 
-    public Soporte toEntity(SoporteRequestDTO dto, String claveEncriptada, Role rol) {
-
+    public Soporte toEntity(SoporteRequestDTO dto,  Role rol) {
 
         Usuario usuario = usuarioFactory.crearDesdeRegistro(dto, RoleEnum.SOPORTE.toString());
 
@@ -33,12 +32,10 @@ public class SoporteMapper {
         usuario.setDatosPersonales(dp);
 
         Soporte soporte = new Soporte();
-        soporte.setEstado(dto.getEstado() != null ? dto.getEstado() : 1);
+        soporte.setUsuario(usuario);
         soporte.setFechaCreacion(LocalDateTime.now());
         soporte.setUltimoAcceso(LocalDateTime.now());
-
-        soporte.setUsuario(usuario);
-
+        soporte.setId(usuario.getId());
         return soporte;
 
 
@@ -48,7 +45,7 @@ public class SoporteMapper {
         SoporteResponseDTO dto = new SoporteResponseDTO();
         dto.setId(s.getId());
         dto.setCorreo(s.getUsuario().getCorreo());
-        dto.setEstado(s.getEstado());
+        dto.setActivo(s.getUsuario().isActivo());
         dto.setFechaCreacion(s.getFechaCreacion());
         dto.setUltimoAcceso(s.getUltimoAcceso());
 

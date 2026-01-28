@@ -1,7 +1,6 @@
 package com.sena.BogotaMetroApp.utils.logic;
 
-import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
-import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
+
 
 import java.security.SecureRandom;
 
