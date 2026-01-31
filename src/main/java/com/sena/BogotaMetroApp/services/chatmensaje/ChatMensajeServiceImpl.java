@@ -29,8 +29,8 @@ public class ChatMensajeServiceImpl implements IChatMensajeService {
     private final MensajeRepository mensajeRepository;
     private final UsuarioRepository usuarioRepository;
     private final ParticipanteSesionRepository participanteRepository;
-
     private final ChatRedisService chatRedisService;
+
     @Override
     @Transactional
     public MensajeDTO procesarYGuardarMensaje(Long idSesion, MensajeDTO mensajeDTO) {

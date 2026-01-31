@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models.sesionchat;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sena.BogotaMetroApp.utils.enums.EstadoSesionEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class SesionChat {
     private Long id;
 
     @OneToMany(mappedBy = "sesionChat", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<ParticipanteSesion> participantes;
 
     @Enumerated(EnumType.STRING)
@@ -32,4 +34,3 @@ public class SesionChat {
     private LocalDateTime fechaCierre;
 
 }
-

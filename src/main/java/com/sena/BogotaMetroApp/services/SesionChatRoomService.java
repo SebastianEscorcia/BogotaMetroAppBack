@@ -1,12 +1,16 @@
 package com.sena.BogotaMetroApp.services;
 
 import com.sena.BogotaMetroApp.externalservices.ChatRedisService;
+import com.sena.BogotaMetroApp.mapper.sesionchat.SesionChatMapper;
+import com.sena.BogotaMetroApp.persistence.models.Mensaje;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.models.sesionchat.ParticipanteSesion;
 import com.sena.BogotaMetroApp.persistence.models.sesionchat.SesionChat;
+import com.sena.BogotaMetroApp.persistence.repository.MensajeRepository;
 import com.sena.BogotaMetroApp.persistence.repository.ParticipanteSesionRepository;
 import com.sena.BogotaMetroApp.persistence.repository.SesionChatRepository;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
+import com.sena.BogotaMetroApp.presentation.dto.sesionchat.SesionChatResponseDTO;
 import com.sena.BogotaMetroApp.utils.enums.EstadoSesionEnum;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +22,15 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class SesionChatRoomService {
+public class
+SesionChatRoomService {
     private final SesionChatRepository sesionChatRepository;
     private final UsuarioRepository usuarioRepository;
     private final ParticipanteSesionRepository participanteRepository;
-
+    private final MensajeRepository mensajeRepository;
     private final ChatRedisService chatRedisService;
+
+    private final SesionChatMapper sesionChatMapper;
 
     @Transactional
     public Long solicitarChatSoporte(Long idUsuarioSolicitante) {
@@ -89,6 +96,34 @@ public class SesionChatRoomService {
         sesionChatRepository.save(sesion);
 
         chatRedisService.actualizarActividad(idSesion);
+    }
+    @Transactional
+    public List<SesionChatResponseDTO> obtenerSesionesPendientesDTO () {
+        return sesionChatRepository.findByEstado(EstadoSesionEnum.PENDIENTE).stream().map(sesionChatMapper::toDTO).toList();
+    }
+    @Transactional
+    public List<SesionChat> obtenerSesionesActivasPorSoporte(Long idSoporte) {
+        return participanteRepository.findSesionesActivasPorUsuario(idSoporte, List.of(EstadoSesionEnum.ACTIVO));
+    }
+
+    @Transactional
+    public SesionChatResponseDTO obtenerSesionPorId(Long idSesion) {
+        SesionChat sesion = sesionChatRepository.findById(idSesion)
+                .orElseThrow(() -> new RuntimeException("Sesión no encontrada"));
+        return sesionChatMapper.toDTO(sesion);
+    }
+    @Transactional
+    public List<Mensaje> obtenerMensajesPorSesion(Long idSesion) {
+        return mensajeRepository.findBySesionChatIdOrderByFechaEnvioAsc(idSesion);
+    }
+
+    @Transactional
+    public List<SesionChatResponseDTO> obtenerSesionesActivasPorSoporteDTO(Long idSoporte) {
+        List<SesionChat> sesiones = participanteRepository
+                .findSesionesActivasPorUsuario(idSoporte, List.of(EstadoSesionEnum.ACTIVO));
+        return sesiones.stream()
+                .map(sesionChatMapper::toDTO)
+                .toList();
     }
 
     @Transactional

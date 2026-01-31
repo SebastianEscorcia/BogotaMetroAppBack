@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,6 +37,7 @@ public class Usuario implements UserDetails {
     private Role rol;
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private DatosPersonales datosPersonales;
 
     @Override

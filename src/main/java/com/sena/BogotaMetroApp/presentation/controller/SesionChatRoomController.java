@@ -1,6 +1,7 @@
 package com.sena.BogotaMetroApp.presentation.controller;
 
 import com.sena.BogotaMetroApp.presentation.dto.sesionchat.AsignarSoporteDTO;
+import com.sena.BogotaMetroApp.presentation.dto.sesionchat.SesionChatResponseDTO;
 import com.sena.BogotaMetroApp.presentation.dto.sesionchat.SolicitudChatDTO;
 import com.sena.BogotaMetroApp.services.SesionChatRoomService;
 import jakarta.validation.Valid;
@@ -9,9 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/chat-rooms")
-@PreAuthorize("hasAnyRole('PASAJERO', 'OPERADOR')")
+@PreAuthorize("hasAnyRole('PASAJERO', 'SOPORTE')")
 @RequiredArgsConstructor
 public class SesionChatRoomController {
     private final SesionChatRoomService sesionChatRoomService;
@@ -29,7 +32,7 @@ public class SesionChatRoomController {
     }
 
     /**
-     * Endpoint para que un operador asigne un soporte a una sesión de chat.
+     * Endpoint para que un soporte se una a sesión de chat.
      * @param idSesion ID de la sesión de chat a la que se asignará el soporte.
      * @param dto Objeto que contiene el ID del soporte a asignar.
      * @return ResponseEntity con un mensaje de confirmación.
@@ -54,4 +57,41 @@ public class SesionChatRoomController {
         sesionChatRoomService.cerrarSesion(idSesion);
         return ResponseEntity.ok("Sesión de chat finalizada");
     }
+
+    /**
+     * Obtener todas las sesiones pendientes (cola de espera para soporte)
+     */
+    @GetMapping("/pendientes")
+    @PreAuthorize("hasRole('SOPORTE')")
+    public ResponseEntity<List<?>> getSesionesPendientes() {
+        // Necesitas implementar este método en SesionChatRoomService
+        return ResponseEntity.ok(sesionChatRoomService.obtenerSesionesPendientesDTO());
+    }
+
+    /**
+     * Obtener las sesiones activas de un soporte específico
+     */
+    @GetMapping("/soporte/{idSoporte}/activas")
+    @PreAuthorize("hasRole('SOPORTE')")
+    public ResponseEntity<List<SesionChatResponseDTO>> getSesionesActivasSoporteDTO(@PathVariable Long idSoporte) {
+        return ResponseEntity.ok(sesionChatRoomService.obtenerSesionesActivasPorSoporteDTO(idSoporte));
+    }
+
+    /**
+     * Obtener detalles de una sesión específica
+     */
+    @GetMapping("/{idSesion}")
+    public ResponseEntity<SesionChatResponseDTO> getSesionById(@PathVariable Long idSesion) {
+        return ResponseEntity.ok(sesionChatRoomService.obtenerSesionPorId(idSesion));
+    }
+
+    /**
+     * Obtener historial de mensajes de una sesión
+     */
+    @GetMapping("/{idSesion}/mensajes")
+    public ResponseEntity<List<?>> getHistorialMensajes(@PathVariable Long idSesion) {
+        // Necesitas implementar este método en tu servicio de mensajes
+        return ResponseEntity.ok(sesionChatRoomService.obtenerMensajesPorSesion(idSesion));
+    }
+
 }
