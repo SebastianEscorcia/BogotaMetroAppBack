@@ -12,6 +12,7 @@ import com.sena.BogotaMetroApp.persistence.repository.interrupcion.InterrupcionR
 import com.sena.BogotaMetroApp.persistence.repository.linea.LineaRepository;
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionUpdateDTO;
 import com.sena.BogotaMetroApp.services.exception.interrupcion.InterrupcionException;
+import com.sena.BogotaMetroApp.services.notificationwebsocket.interrupcion.InterrupcionWebSocketNotifier;
 import com.sena.BogotaMetroApp.utils.enums.EstadoInterrupcionEnum;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
     private final LineaRepository lineaRepository;
     private final InterrupcionMapper mapper;
 
-    private final InterrupcionNotificationService notificationService;
+    private final InterrupcionWebSocketNotifier interrupcionWebSocketNotifier;
 
     @Override
     @Transactional
@@ -62,7 +63,7 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
 
         Interrupcion guardada = repository.save(inter);
         InterrupcionResponseDTO responseDTO = mapper.toDTO(guardada);
-        notificationService.notificarNuevaInterrupcion(responseDTO);
+        interrupcionWebSocketNotifier.notificarNuevaInterrupcion(responseDTO);
         return responseDTO;
     }
 
@@ -80,7 +81,7 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
         inter.setActivo(false);
         repository.save(inter);
 
-        notificationService.notificarEliminacion(id);
+        interrupcionWebSocketNotifier.notificarEliminacion(id);
     }
 
 
@@ -101,7 +102,7 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
         Interrupcion actualizada = repository.save(inter);
 
 
-        notificationService.notificarActualizacion(mapper.toDTO(actualizada));
+        interrupcionWebSocketNotifier.notificarActualizacion(mapper.toDTO(actualizada));
     }
 
     @Override
@@ -119,7 +120,7 @@ public class InterrupcionServicesImpl implements IInterrupcionServices {
 
         Interrupcion actualizada = repository.save(inter);
         InterrupcionResponseDTO responseDTO = mapper.toDTO(actualizada);
-        notificationService.notificarActualizacion(responseDTO);
+        interrupcionWebSocketNotifier.notificarActualizacion(responseDTO);
 
         return responseDTO;
     }

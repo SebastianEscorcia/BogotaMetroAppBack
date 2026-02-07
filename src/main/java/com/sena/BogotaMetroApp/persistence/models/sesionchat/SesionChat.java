@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,7 +22,7 @@ public class SesionChat {
 
     @OneToMany(mappedBy = "sesionChat", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<ParticipanteSesion> participantes;
+    private List<ParticipanteSesion> participantes = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EstadoSesionEnum estado;

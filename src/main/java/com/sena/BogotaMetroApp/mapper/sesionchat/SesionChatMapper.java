@@ -18,6 +18,7 @@ public class SesionChatMapper {
             ParticipanteDTO pDto = new ParticipanteDTO();
             pDto.setId(p.getId());
             pDto.setIdUsuario(p.getUsuario().getId());
+            pDto.setRol(p.getUsuario().getRol().getNombre());
             pDto.setNombreUsuario(p.getUsuario().getDatosPersonales() != null
                     ? p.getUsuario().getDatosPersonales().getNombreCompleto()
                     : p.getUsuario().getCorreo());

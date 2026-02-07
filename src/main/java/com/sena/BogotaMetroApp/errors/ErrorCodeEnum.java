@@ -85,6 +85,11 @@ public enum ErrorCodeEnum implements ErrorCode {
     CHAT_ACCESO_DENEGADO("CHAT_FORBIDDEN", "Acceso denegado: Usted no es un participante activo de este chat"),
     CHAT_REMITENTE_NOT_FOUND("CHAT_USER_NOT_FOUND", "El usuario remitente no existe"),
     CHAT_SOPORTE_INVALIDO("CHAT_SUPPORT_INVALID", "El usuario asignado no tiene rol de SOPORTE"),
+    CHAT_PENDIENTE_ASIGNACION("CHAT_PENDING_ASSIGNMENT", "La sesión de chat aún no tiene un soporte asignado"),
+    CHAT_REMITENTE_SOPORTE_INACTIVO("CHAT_USER_INACTIVE", "El soporte remitente está inactivo"),
+    CHAT_SOPORTE_NOT_FOUND("CHAT_SUPPORT_NOT_FOUND", "No se encontró un usuario con rol de soporte disponible"),
+    CHAT_TOMADO_POR_SOPORTE("CHAT_TOMADO_POR_SOPORTE", "Esta sesión ya ha sido tomada por otro agente de soporte"),
+    CHAT_MENSAJE_VACIO("CHAT_EMPTY_MESSAGE", "El mensaje no puede estar vacío"),
 
     // Autenticación y Recuperación Errors
     AUTH_TOKEN_INVALID("AUTH_TOKEN_INVALID", "Token de recuperación inválido o no encontrado"),

@@ -1,7 +1,7 @@
-package com.sena.BogotaMetroApp.externalservices;
+package com.sena.BogotaMetroApp.listeners;
 
 import com.sena.BogotaMetroApp.persistence.repository.SesionChatRepository;
-import com.sena.BogotaMetroApp.services.ChatNotificationService;
+import com.sena.BogotaMetroApp.services.notificationwebsocket.chat.ChatWebSocketNotifier;
 import com.sena.BogotaMetroApp.utils.enums.EstadoSesionEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
@@ -18,15 +18,15 @@ import java.time.LocalDateTime;
  */
 @Component
 @Slf4j
-public class ChatExpirationListener extends KeyExpirationEventMessageListener {
+public class ChatExpirationInactivityRedisListener extends KeyExpirationEventMessageListener {
 
     private final SesionChatRepository sesionChatRepository;
-    private final ChatNotificationService chatNotificationService;
+    private final ChatWebSocketNotifier chatWebSocketNotifier;
 
-    public ChatExpirationListener(RedisMessageListenerContainer listenerContainer, SesionChatRepository sesionChatRepository,
-                                  ChatNotificationService chatNotificationService) {
+    public ChatExpirationInactivityRedisListener(RedisMessageListenerContainer listenerContainer, SesionChatRepository sesionChatRepository,
+                                                 ChatWebSocketNotifier chatWebSocketNotifier) {
         super(listenerContainer);
-        this.chatNotificationService = chatNotificationService;
+        this.chatWebSocketNotifier = chatWebSocketNotifier;
         this.sesionChatRepository = sesionChatRepository;
     }
 
@@ -51,7 +51,7 @@ public class ChatExpirationListener extends KeyExpirationEventMessageListener {
                 sesionChat.setFechaCierre(LocalDateTime.now());
                 sesionChatRepository.save(sesionChat);
 
-                chatNotificationService.notificarCierre(idSesion, "Sesión cerrada por inactividad (Redis).");
+                chatWebSocketNotifier.notificarEvento(idSesion, "Sesión cerrada por inactividad (Redis).");
                 log.info("✅ Sesión {} cerrada correctamente en BD y notificada.", idSesion);
             }
         });

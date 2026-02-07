@@ -64,7 +64,6 @@ public class SesionChatRoomController {
     @GetMapping("/pendientes")
     @PreAuthorize("hasRole('SOPORTE')")
     public ResponseEntity<List<?>> getSesionesPendientes() {
-        // Necesitas implementar este método en SesionChatRoomService
         return ResponseEntity.ok(sesionChatRoomService.obtenerSesionesPendientesDTO());
     }
 
@@ -90,7 +89,6 @@ public class SesionChatRoomController {
      */
     @GetMapping("/{idSesion}/mensajes")
     public ResponseEntity<List<?>> getHistorialMensajes(@PathVariable Long idSesion) {
-        // Necesitas implementar este método en tu servicio de mensajes
         return ResponseEntity.ok(sesionChatRoomService.obtenerMensajesPorSesion(idSesion));
     }
 

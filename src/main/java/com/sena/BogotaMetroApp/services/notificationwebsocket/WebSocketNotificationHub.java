@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.services.notificationwebsocket;
 
+import com.sena.BogotaMetroApp.presentation.dto.sesionchat.SesionChatResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,16 @@ public class WebSocketNotificationHub implements IBroadcastNotifier, IGroupNotif
     @Override
     public void enviarAInterrupciones(Object payload) {
         template.convertAndSend("/topic/interrupciones", payload);
+    }
+
+    @Override
+    public void enviarSesionTomada(Object payload) {
+        template.convertAndSend("/topic/sesion-tomada", payload);
+    }
+
+    @Override
+    public void enviarNuevaSesionPendiente(SesionChatResponseDTO dto) {
+        template.convertAndSend("/topic/sesiones-pendientes", dto);
     }
 
     @Override
