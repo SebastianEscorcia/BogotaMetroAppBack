@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.sena.BogotaMetroApp.presentation.dto.sesionchat.SesionChatResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -36,12 +37,12 @@ public class AbstractRedisCacheService {
     /**
      * Deserializa JSON a un objeto
      */
-    protected <T> Optional<T> deserialize(String json, Class<T> clazz) {
+    protected <T> Optional<T> deserialize(String json, TypeReference<List<SesionChatResponseDTO>> clazz) {
         if (json == null || json.isEmpty()) {
             return Optional.empty();
         }
         try {
-            return Optional.of(objectMapper.readValue(json, clazz));
+            return (Optional<T>) Optional.of(objectMapper.readValue(json, clazz));
         } catch (JsonProcessingException e) {
             log.error("Error deserializando datos: {}", e.getMessage());
             return Optional.empty();

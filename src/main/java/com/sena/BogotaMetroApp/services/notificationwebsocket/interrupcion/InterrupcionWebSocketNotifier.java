@@ -1,4 +1,4 @@
-package com.sena.BogotaMetroApp.services.interrupcion;
+package com.sena.BogotaMetroApp.services.notificationwebsocket.interrupcion;
 
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionResponseDTO;
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.NotificacionInterrupcionDTO;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class InterrupcionNotificationService {
+public class InterrupcionWebSocketNotifier {
 
     private final IBroadcastNotifier broadcastNotifier;
 

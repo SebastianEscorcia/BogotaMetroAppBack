@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models.sesionchat;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class ParticipanteSesion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_sesion", nullable = false)
+    @JsonBackReference
     private SesionChat sesionChat;
 
     @ManyToOne(fetch = FetchType.LAZY)

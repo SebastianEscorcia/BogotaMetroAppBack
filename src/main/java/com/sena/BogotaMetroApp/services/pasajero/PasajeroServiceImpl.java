@@ -70,7 +70,7 @@ public class PasajeroServiceImpl implements IPasajeroService {
         Pasajero pasajero = pasajeroRepository.findByUsuarioCorreo(correo)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con el correo: " + correo));
 
-        if(!pasajero.getUsuario().isActivo()){
+        if (!pasajero.getUsuario().isActivo()) {
             throw new PasajeroException(ErrorCodeEnum.PASAJERO_INACTIVO);
         }
         return mapper.toDTO(pasajero);

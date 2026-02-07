@@ -11,12 +11,13 @@ import com.sena.BogotaMetroApp.persistence.repository.SesionChatRepository;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.presentation.dto.MensajeDTO;
 import com.sena.BogotaMetroApp.services.exception.chat.ChatException;
-import com.sena.BogotaMetroApp.utils.enums.EstadoSesionEnum;
+import com.sena.BogotaMetroApp.utils.enums.TipoRemitenteEnum;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Implementación del servicio para el procesamiento y almacenamiento de mensajes en sesiones de chat.
@@ -29,8 +30,8 @@ public class ChatMensajeServiceImpl implements IChatMensajeService {
     private final MensajeRepository mensajeRepository;
     private final UsuarioRepository usuarioRepository;
     private final ParticipanteSesionRepository participanteRepository;
-
     private final ChatRedisService chatRedisService;
+
     @Override
     @Transactional
     public MensajeDTO procesarYGuardarMensaje(Long idSesion, MensajeDTO mensajeDTO) {
@@ -65,10 +66,12 @@ public class ChatMensajeServiceImpl implements IChatMensajeService {
 
 
     private void validarReglasDeNegocio(SesionChat sesion, Usuario remitente) {
-        // Regla 1: Chat Cerrado
-        if (sesion.getEstado() == EstadoSesionEnum.CERRADO) {
-            throw new ChatException(ErrorCodeEnum.CHAT_CERRADO);
+
+        switch (sesion.getEstado()){
+            case CERRADO -> throw new ChatException(ErrorCodeEnum.CHAT_CERRADO);
+            case PENDIENTE -> throw new ChatException(ErrorCodeEnum.CHAT_PENDIENTE_ASIGNACION);
         }
+        if(!remitente.isEnabled() && Objects.equals(remitente.getRol().getNombre(), TipoRemitenteEnum.SOPORTE.name())) throw  new ChatException(ErrorCodeEnum.CHAT_REMITENTE_SOPORTE_INACTIVO);
 
         boolean esParticipante = participanteRepository
                 .existsBySesionChatIdAndUsuarioIdAndActivoTrue(sesion.getId(), remitente.getId());

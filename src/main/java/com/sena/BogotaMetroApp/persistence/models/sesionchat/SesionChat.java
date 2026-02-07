@@ -1,11 +1,13 @@
 package com.sena.BogotaMetroApp.persistence.models.sesionchat;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sena.BogotaMetroApp.utils.enums.EstadoSesionEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,7 +21,8 @@ public class SesionChat {
     private Long id;
 
     @OneToMany(mappedBy = "sesionChat", cascade = CascadeType.ALL)
-    private List<ParticipanteSesion> participantes;
+    @JsonManagedReference
+    private List<ParticipanteSesion> participantes = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EstadoSesionEnum estado;
@@ -32,4 +35,3 @@ public class SesionChat {
     private LocalDateTime fechaCierre;
 
 }
-

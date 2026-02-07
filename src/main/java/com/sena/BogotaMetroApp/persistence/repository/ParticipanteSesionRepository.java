@@ -21,4 +21,29 @@ public interface ParticipanteSesionRepository extends JpaRepository<Participante
     Optional<SesionChat> findSesionActivaPorUsuario(
             @Param("idUsuario") Long idUsuario,
             @Param("estados") List<EstadoSesionEnum> estados);
+
+    @Query("SELECT p.sesionChat FROM ParticipanteSesion p " +
+            "WHERE p.usuario.id = :idSoporte " +
+            "AND p.sesionChat.estado IN :estados " +
+            "AND p.activo = true")
+    List<SesionChat> findSesionesActivasPorUsuario(
+            @Param("idSoporte") Long idSoporte,
+            @Param("estados") List<EstadoSesionEnum> estados);
+
+    @Query("""
+        SELECT DISTINCT s FROM SesionChat s
+        JOIN FETCH s.participantes p
+        JOIN FETCH p.usuario u
+        JOIN FETCH u.rol
+        LEFT JOIN FETCH u.datosPersonales
+        WHERE s.id IN (
+            SELECT ps.sesionChat.id FROM ParticipanteSesion ps 
+            WHERE ps.usuario.id = :idSoporte 
+            AND ps.sesionChat.estado IN :estados 
+            AND ps.activo = true
+        )
+    """)
+    List<SesionChat> findSesionesActivasPorUsuarioOptimizado(
+            @Param("idSoporte") Long idSoporte,
+            @Param("estados") List<EstadoSesionEnum> estados);
 }

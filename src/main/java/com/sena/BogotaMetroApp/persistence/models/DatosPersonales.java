@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sena.BogotaMetroApp.utils.enums.TipoDocumentoEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class DatosPersonales {
 
     @OneToOne
     @JoinColumn(name = "id_usuario", nullable = false, unique = true)
+    @JsonBackReference
     private Usuario usuario;
 
     private String nombreCompleto;

@@ -1,19 +1,21 @@
 package com.sena.BogotaMetroApp.services.auth;
 
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
+import com.sena.BogotaMetroApp.mapper.auth.UserAuthMapper;
 import com.sena.BogotaMetroApp.persistence.models.PasswordResetToken;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.repository.PasswordResetTokenRepository;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
+import com.sena.BogotaMetroApp.presentation.dto.auth.UserAfterAuthDTO;
 import com.sena.BogotaMetroApp.presentation.dto.login.AuthResponse;
 import com.sena.BogotaMetroApp.presentation.dto.login.LoginRequest;
 import com.sena.BogotaMetroApp.externalservices.email.TurboSMTPEmailService;
 import com.sena.BogotaMetroApp.services.JwtServices;
 import com.sena.BogotaMetroApp.services.exception.auth.AuthException;
+import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,13 +25,14 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthServiceImpl implements IAuthService {
+public  class AuthServiceImpl implements IAuthService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordResetTokenRepository tokenRepository;
     private final JwtServices jwtService;
     private final PasswordEncoder passwordEncoder;
     private final TurboSMTPEmailService emailService;
+    private final UserAuthMapper userAuthMapper;
 
     @Override
     public AuthResponse login(LoginRequest request) {
@@ -92,5 +95,13 @@ public class AuthServiceImpl implements IAuthService {
 
 
         tokenRepository.delete(resetToken);
+    }
+
+    @Override
+    public UserAfterAuthDTO obterMisDatos() {
+        String correo = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepository.findByCorreo(correo).orElseThrow(() -> new UsuarioException(ErrorCodeEnum.USUARIO_NOT_FOUND));
+
+        return userAuthMapper.toDTO(usuario);
     }
 }

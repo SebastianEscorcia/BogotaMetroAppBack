@@ -2,15 +2,14 @@ package com.sena.BogotaMetroApp.presentation.controller.authentication;
 
 
 import com.sena.BogotaMetroApp.presentation.dto.auth.CambioClaveDTO;
+import com.sena.BogotaMetroApp.presentation.dto.auth.UserAfterAuthDTO;
 import com.sena.BogotaMetroApp.presentation.dto.login.AuthResponse;
 import com.sena.BogotaMetroApp.presentation.dto.login.LoginRequest;
 import com.sena.BogotaMetroApp.services.auth.IAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -45,6 +44,10 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada exitosamente."));
     }
 
-
+    @GetMapping("/usuario/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserAfterAuthDTO> obtenerDatosUsuario() {
+        return ResponseEntity.ok(authService.obterMisDatos());
+    }
 
 }
