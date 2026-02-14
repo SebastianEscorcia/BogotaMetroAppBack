@@ -18,7 +18,7 @@ public class TransaccionSecurityService {
     private final UsuarioRepository usuarioRepository;
 
     // Valida si el usuario logueado es el dueño del ID o si es Soporte
-    public boolean esDueñoOEsSoporte(Long idUsuarioSolicitado) {
+    public boolean esDuenioOEsSoporte(Long idUsuarioSolicitado) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()) return false;
@@ -28,7 +28,6 @@ public class TransaccionSecurityService {
             return true;
         }
 
-        // Obtener el ID del usuario logueado
         Long idAutenticado = obtenerIdUsuarioAutenticado(auth);
 
         return idAutenticado.equals(idUsuarioSolicitado);

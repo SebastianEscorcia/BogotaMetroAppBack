@@ -12,7 +12,7 @@ public class TarifaSistemaMapper {
     public TarifaSistema toEntity(TarifaSistemaRequestDTO dto) {
         TarifaSistema tarifa = new TarifaSistema();
         tarifa.setValorTarifa(dto.getValorTarifa());
-        tarifa.setDescripcion(dto.getDescripcion());
+        //tarifa.setDescripcion(dto.getDescripcion());
         tarifa.setActiva(dto.getActiva() != null ? dto.getActiva() : true);
         return tarifa;
     }

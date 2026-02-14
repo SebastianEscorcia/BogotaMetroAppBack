@@ -26,7 +26,7 @@ public class TarifaSistema extends AuditableEntity {
     private BigDecimal valorTarifa;
 
     @Column(name = "descripcion", length = 255)
-    private String descripcion;  // Ej. "Tarifa estándar Metro"
+    private String descripcion = "Tarifa estándar Metro";
 
     @Column(name = "activa", nullable = false)
     private Boolean activa = true;

@@ -23,7 +23,6 @@ public class SecurityConfig {
                         // 1. Rutas Públicas (Login, Registro, WebSockets)
                         .requestMatchers(SecurityConstant.PUBLIC_URLS).permitAll()
 
-
                         .requestMatchers("/api/pasajero-viaje/**").hasAnyRole("SOPORTE", "OPERADOR")
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

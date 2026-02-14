@@ -52,7 +52,7 @@ public class TorniqueteServiceImpl implements ITorniqueteService {
 
         TarjetaVirtual tarjeta = pasajero.getTarjetaVirtual();
 
-        if (tarjeta.getSaldo().compareTo(tarifaService.obtenerValorTarifaActual()) < 0) {
+        if (tarjeta.getSaldo().compareTo(tarifaService.obtenerValorTarifaActual()) <= 0) {
             throw new PagoException(ErrorCodeEnum.SALDO_INSUFICIENTE);
         }
         tarjetaService.descontarSaldo(usuario.getId(), tarifaService.obtenerValorTarifaActual());

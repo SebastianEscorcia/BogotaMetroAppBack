@@ -1,11 +1,14 @@
 package com.sena.BogotaMetroApp.presentation.controller.transaccion;
 
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
+
+import com.sena.BogotaMetroApp.persistence.models.transaccion.Recarga;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionResponseDTO;
 import com.sena.BogotaMetroApp.security.TransaccionSecurityService;
 import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import com.sena.BogotaMetroApp.services.transaccion.ITransaccionService;
+import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,7 +31,6 @@ public class TransaccionController {
     private final ITransaccionService transaccionService;
     private final TransaccionSecurityService transaccionSecurityService;
 
-
     @PreAuthorize("hasRole('PASAJERO')")
     @PostMapping("/registrar")
     public ResponseEntity<TransaccionResponseDTO> registrarPago(@RequestBody TransaccionRequestDTO dto) {
@@ -45,14 +47,14 @@ public class TransaccionController {
     public ResponseEntity<TransaccionResponseDTO> obtenerPagoPorId(@PathVariable Long id) {
         TransaccionResponseDTO tx = transaccionService.obtenerTransaccionPorId(id);
 
-        if (!transaccionSecurityService.esDueñoOEsSoporte(tx.getIdUsuario()))
+        if (!transaccionSecurityService.esDuenioOEsSoporte(tx.getIdUsuario()))
             throw new UsuarioException(ErrorCodeEnum.ACCESO_DENEGADO);
 
         return ResponseEntity.ok(tx);
     }
 
 
-    @PreAuthorize("@transaccionSecurityService.esDueñoOEsSoporte(#idUsuario)")
+    @PreAuthorize("@transaccionSecurityService.esDuenioOEsSoporte(#idUsuario)")
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorUsuario(@PathVariable Long idUsuario) {
         return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorUsuario(idUsuario));
@@ -67,7 +69,7 @@ public class TransaccionController {
     }
 
     //Filtro para buscar transacciones por varios criterios como monto y fechas
-    @PreAuthorize("@transaccionSecurityService.esDueñoOEsSoporte(#idUsuario)")
+    @PreAuthorize("@transaccionSecurityService.esDuenioOEsSoporte(#idUsuario)")
     @GetMapping("/usuario/{idUsuario}/buscar")
     public ResponseEntity<List<TransaccionResponseDTO>> buscarTransacciones(
             @PathVariable Long idUsuario,
@@ -81,17 +83,22 @@ public class TransaccionController {
     }
 
     @PreAuthorize("hasRole('SOPORTE')")
-    @GetMapping("/pasarela/{idPasarela}")
-    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorPasarela(@PathVariable Long idPasarela) {
-        return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorPasarela(idPasarela));
+    @GetMapping("/recarga/usuario/medio-pago/{medioPago}")
+    public ResponseEntity<List<Recarga>> obtenerPagosPorMedioPago(@PathVariable MedioPagoEnum medioPago) {
+        return ResponseEntity.ok(transaccionService.obtenerRecargasPorMedioPago(medioPago));
     }
 
-    // Ver por referencia de pasarela (para reclamos)
     @PreAuthorize("hasRole('SOPORTE')")
-    @GetMapping("/referencia/{referencia}")
-    public ResponseEntity<TransaccionResponseDTO> obtenerPagoPorReferencia(@PathVariable String referencia) {
-        return ResponseEntity.ok(transaccionService.obtenerTransaccionPorReferencia(referencia));
+    @GetMapping("/usuario/documento/{numDocumento}")
+    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorNumDocumento(@PathVariable String numDocumento) {
+        return ResponseEntity.ok(transaccionService.obtenerTransaccionPorNumDocumentoUsuario(numDocumento));
     }
+    @PreAuthorize("hasRole('SOPORTE')")
+    @GetMapping("/usuario/nombre/{nombre}")
+    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorNombre(@PathVariable String nombre) {
+        return ResponseEntity.ok(transaccionService.obtenerTransaccionPorNombre(nombre));
+    }
+
 
 
     @GetMapping("/usuario/{idUsuario}/fechas")
