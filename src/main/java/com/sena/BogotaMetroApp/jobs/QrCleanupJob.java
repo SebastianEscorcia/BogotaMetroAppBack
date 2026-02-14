@@ -22,13 +22,11 @@ public class QrCleanupJob {
     private final QrNoUsadoRepository qrNoUsadoRepository;
 
     /**
-     * Limpia QRs expirados cada 5 minutos.
-     *
+     * Limpia QR expirados cada 5 minutos.
      * NOTA: No es necesario invalidar Redis porque:
      * 1. El TTL de Redis ya eliminó automáticamente el caché cuando expiró
      * 2. Si el usuario pide un nuevo QR, el servicio ya maneja la limpieza
-     *
-     * Este job solo sirve para limpiar la BD de QRs que expiraron
+     * Este job solo sirve para limpiar la BD de QR que expiraron
      * y el usuario nunca volvió a solicitar uno nuevo.
      */
     @Scheduled(cron = "0 */5 * * * *")

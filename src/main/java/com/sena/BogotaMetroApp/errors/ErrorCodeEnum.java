@@ -74,7 +74,7 @@ public enum ErrorCodeEnum implements ErrorCode {
     // Horario Sistema Errors
     HORARIO_NOT_FOUND("HORARIO_NOT_FOUND","Horario del sistema no encontrado"),
     HORARIO_INVALID_TIME("HORARIO_INVALID_TIME","Hora de fin debe ser posterior a hora de inicio"),
-
+    HORARIO_ALREADY_EXISTS("HORARIO_ALREADY_EXISTS", "Ya existe un horario configurado para este día"),
     // Tarifa Sistema Errors
     TARIFA_NOT_FOUND("TARIFA_NOT_FOUND", "No hay tarifa configurada en el sistema"),
     TARIFA_VALOR_INVALIDO("TARIFA_VALOR_INVALIDO", "El valor de la tarifa debe ser mayor a cero"),

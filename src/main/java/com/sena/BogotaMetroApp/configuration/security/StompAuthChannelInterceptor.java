@@ -16,60 +16,64 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Interceptor STOMP para autenticar usuarios en conexiones WebSocket.
+ * Este interceptor valida que el usuario esté autenticado durante el handshake
+ * y establece el contexto de seguridad para la sesión WebSocket.
+ * Permite conexión a CUALQUIER usuario autenticado (PASAJERO, ADMIN, SOPORTE, etc.)
+ * La autorización específica por rol se maneja en los controladores de mensajes.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class StompAuthChannelInterceptor implements ChannelInterceptor {
+
     private final UsuarioRepository usuarioRepository;
 
     @Override
     public @Nullable Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-            Map<String, Object> attrs = accessor.getSessionAttributes();
-            String correo = attrs != null ? (String) attrs.get("ws_user_email") : null;
-
-            if (correo == null || correo.isBlank()) {
-                log.warn("CONNECT rechazado: no hay usuario en atributos de handshake");
-                try {
-                    throw new AccessDeniedException("No autorizado para WebSocket");
-                } catch (AccessDeniedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            Usuario usuario = null;
-            try {
-                usuario = usuarioRepository.findByCorreo(correo)
-                        .orElseThrow(() -> new AccessDeniedException("Usuario no encontrado"));
-            } catch (AccessDeniedException e) {
-                throw new RuntimeException(e);
-            }
-
-            String rol = usuario.getRol().getNombre();
-            if (!"PASAJERO".equalsIgnoreCase(rol)) {
-                log.warn("CONNECT rechazado para {} con rol {}", correo, rol);
-                try {
-                    throw new AccessDeniedException("Rol no autorizado para este canal");
-                } catch (AccessDeniedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            var auth = new UsernamePasswordAuthenticationToken(
-                    usuario.getCorreo(),
-                    null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + rol))
-            );
-
-            accessor.setUser(auth);
-            log.info("STOMP user autenticado: {}", auth.getName());
+        if (accessor == null || !StompCommand.CONNECT.equals(accessor.getCommand())) {
+            return message;
         }
+
+        // Obtener el correo del usuario desde los atributos del handshake
+        Map<String, Object> attrs = accessor.getSessionAttributes();
+        String correo = (attrs != null) ? (String) attrs.get("ws_user_email") : null;
+
+        if (correo == null || correo.isBlank()) {
+            log.warn("STOMP CONNECT rechazado: no hay usuario autenticado en el handshake");
+            throw new IllegalStateException("No autorizado para WebSocket: usuario no autenticado");
+        }
+
+        // Buscar el usuario en la base de datos
+        Usuario usuario = usuarioRepository.findByCorreo(correo).orElse(null);
+
+        if (usuario == null) {
+            log.warn("STOMP CONNECT rechazado: usuario no encontrado en BD - {}", correo);
+            throw new IllegalStateException("No autorizado para WebSocket: usuario no existe");
+        }
+
+        if (!usuario.isActivo()) {
+            log.warn("STOMP CONNECT rechazado: usuario inactivo - {}", correo);
+            throw new IllegalStateException("No autorizado para WebSocket: usuario inactivo");
+        }
+
+        // Crear la autenticación con el rol del usuario
+        String rol = usuario.getRol().getNombre();
+        var auth = new UsernamePasswordAuthenticationToken(
+                usuario.getCorreo(),
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + rol))
+        );
+
+        // Establecer el usuario autenticado en la sesión STOMP
+        accessor.setUser(auth);
+        log.info("STOMP usuario autenticado: {} con rol {}", correo, rol);
 
         return message;
     }

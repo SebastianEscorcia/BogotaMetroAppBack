@@ -20,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/horarios-sistema")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Horarios Sistema", description = "Gestión de horarios de operación del Metro")
 public class HorarioSistemaController {
 
@@ -30,7 +31,7 @@ public class HorarioSistemaController {
             @ApiResponse(responseCode = "201", description = "Horario creado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
-    @PreAuthorize("hasRole('OPERADOR')")
+
     @PostMapping
     public ResponseEntity<HorarioSistemaResponseDTO> crearHorario(@Valid @RequestBody HorarioSistemaRequestDTO request) {
         HorarioSistemaResponseDTO response = horarioService.crearHorario(request);

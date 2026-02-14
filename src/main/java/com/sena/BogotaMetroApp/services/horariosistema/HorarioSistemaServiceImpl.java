@@ -25,6 +25,12 @@ public class HorarioSistemaServiceImpl implements IHorarioSistemaService {
 
     @Override
     public HorarioSistemaResponseDTO crearHorario(HorarioSistemaRequestDTO request) {
+        boolean existeHorario = horarioRepo.findByDiaAndActivoTrue(request.getDia()).isPresent();
+
+        if (existeHorario) {
+            throw new HorarioSistemaException(ErrorCodeEnum.HORARIO_ALREADY_EXISTS);
+        }
+
         HorarioSistema horario = mapper.toEntity(request);
         HorarioSistema guardado = horarioRepo.save(horario);
         return mapper.toDTO(guardado);
@@ -48,6 +54,15 @@ public class HorarioSistemaServiceImpl implements IHorarioSistemaService {
     public HorarioSistemaResponseDTO actualizarHorario(Long id, HorarioSistemaRequestDTO request) {
         HorarioSistema horario = horarioRepo.findById(id)
                 .orElseThrow(() -> new HorarioSistemaException(ErrorCodeEnum.HORARIO_NOT_FOUND));
+
+        boolean existeOtroHorarioConMismoDia = horarioRepo
+                .findByDiaAndActivoTrueAndIdNot(request.getDia(), id)
+                .isPresent();
+
+        if (existeOtroHorarioConMismoDia) {
+            throw new HorarioSistemaException(ErrorCodeEnum.HORARIO_ALREADY_EXISTS);
+        }
+
         mapper.updateEntity(horario, request);
         HorarioSistema actualizado = horarioRepo.save(horario);
         return mapper.toDTO(actualizado);
@@ -68,7 +83,7 @@ public class HorarioSistemaServiceImpl implements IHorarioSistemaService {
 
         HorarioSistema horario = horarioRepo.findByDiaAndActivoTrue(diaActual).orElse(null);
         if (horario == null) {
-            return false;  // No hay horario configurado
+            return false;
         }
 
         return !horaActual.isBefore(horario.getHoraInicio()) && !horaActual.isAfter(horario.getHoraFin());
