@@ -1,17 +1,19 @@
 package com.sena.BogotaMetroApp.services.transaccion;
 
-import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
-import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
+
+import com.sena.BogotaMetroApp.events.pago.RecargaRegistradaEvent;
+
 import com.sena.BogotaMetroApp.persistence.models.transaccion.Recarga;
-import com.sena.BogotaMetroApp.persistence.repository.TarjetaVirtualRepository;
 import com.sena.BogotaMetroApp.persistence.repository.transaccion.RecargaRepository;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionResponseDTO;
 import com.sena.BogotaMetroApp.mapper.pago.TransaccionMapper;
 import com.sena.BogotaMetroApp.persistence.models.transaccion.Transaccion;
 import com.sena.BogotaMetroApp.persistence.repository.transaccion.TransaccionRepository;
-import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
+
+import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,21 +28,27 @@ public class TransaccionServiceImpl implements ITransaccionService {
 
     private final TransaccionMapper transaccionMapper;
     private final TransaccionRepository transaccionRepository;
-    private final TarjetaVirtualRepository tarjetaVirtualRepository;
+
     private final RecargaRepository recargaRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
     public TransaccionResponseDTO registrarRecarga(TransaccionRequestDTO dto) {
         Recarga recarga = transaccionMapper.toRecargaEntity(dto);
+        Recarga recargaGuardada = transaccionRepository.save(recarga);
 
-        TarjetaVirtual tarjetaVirtual = tarjetaVirtualRepository.findByPasajeroUsuarioId(recarga.getUsuario().getId()).orElseThrow(() -> new UsuarioException(ErrorCodeEnum.USUARIO_DONT_CARD_ACTIVE));
+        String correoUsuario = recarga.getUsuario().getCorreo();
 
-        tarjetaVirtual.setSaldo(tarjetaVirtual.getSaldo().add(recarga.getValor()));
-        tarjetaVirtualRepository.save(tarjetaVirtual);
-        recarga.setTarjetaVirtual(tarjetaVirtual);
+        eventPublisher.publishEvent(new RecargaRegistradaEvent(
+                recargaGuardada.getId(),
+                recarga.getUsuario().getId(),
+                recarga.getValor(),
+                recarga.getMedioDePago(),
+                correoUsuario
+        ));
 
-        return transaccionMapper.toDTO(transaccionRepository.save(recarga));
+        return transaccionMapper.toDTO(recargaGuardada);
     }
 
     @Override
@@ -56,21 +64,6 @@ public class TransaccionServiceImpl implements ITransaccionService {
                 .stream()
                 .map(transaccionMapper::toDTO)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<TransaccionResponseDTO> obtenerTransaccionesPorPasarela(Long idPasarela) {
-        return recargaRepository.findByPasarelaId(idPasarela)
-                .stream()
-                .map(transaccionMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public TransaccionResponseDTO obtenerTransaccionPorReferencia(String referencia) {
-        Recarga recarga = recargaRepository.findByReferenciaPasarela(referencia)
-                .orElseThrow(() -> new RuntimeException("Pago no encontrado con esa referencia"));
-        return transaccionMapper.toDTO(recarga);
     }
 
     @Override
@@ -100,6 +93,22 @@ public class TransaccionServiceImpl implements ITransaccionService {
                 .stream()
                 .map(transaccionMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TransaccionResponseDTO> obtenerTransaccionPorNumDocumentoUsuario(String numDocumento) {
+        return transaccionRepository.findByUsuarioDatosPersonalesNumDocumento(numDocumento).stream().map(transaccionMapper::toDTO).collect(Collectors.toList());
+    }
+
+
+    @Override
+    public List<TransaccionResponseDTO> obtenerTransaccionPorNombre(String nombre) {
+        return transaccionRepository.findByUsuarioDatosPersonalesNombreCompleto(nombre).stream().map(transaccionMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Recarga> obtenerRecargasPorMedioPago(MedioPagoEnum medioPago) {
+        return recargaRepository.findRecargaByMedioDePago(medioPago);
     }
 }
 

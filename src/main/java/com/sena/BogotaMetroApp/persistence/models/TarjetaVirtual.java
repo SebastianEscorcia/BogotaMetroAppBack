@@ -19,7 +19,6 @@ public class TarjetaVirtual {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tarjeta")
     private Long idTarjeta;
-    // Usamos UUID para generar un número único de tarjeta interno
     @Column(name = "numero_tarjeta", unique = true, nullable = false, length = 36)
     private String numeroTarjeta;
 
@@ -42,7 +41,7 @@ public class TarjetaVirtual {
     @PrePersist
     public void prePersist() {
         if (this.numeroTarjeta == null) {
-            //this.numeroTarjeta = UUID.randomUUID().toString();
+
             this.numeroTarjeta = TarjetaUtil.generarNumeroTarjeta();
         }
         if (this.saldo == null) {

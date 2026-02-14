@@ -14,7 +14,8 @@ public interface TransaccionRepository extends JpaRepository<Transaccion, Long> 
 
     // Buscar pagos por usuario
     List<Transaccion> findByUsuarioId(Long idUsuario);
-
+    List<Transaccion> findByUsuarioDatosPersonalesNumDocumento(String numDocumento);
+    List<Transaccion> findByUsuarioDatosPersonalesNombreCompleto(String nombre);
 
     @Query("SELECT t FROM Transaccion t WHERE t.fecha BETWEEN :fechaInicio AND :fechaFin")
     List<Transaccion> findByFechaBetween(

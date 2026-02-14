@@ -1,10 +1,10 @@
 package com.sena.BogotaMetroApp.configuration.security;
 
-import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.services.JwtServices;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,31 +24,57 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UsuarioRepository usuarioRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String token = resolveToken(request);
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            String token = authHeader.substring(7);
             String correo = jwtService.extraerCorreo(token);
 
             if (correo != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 usuarioRepository.findByCorreo(correo).ifPresent(usuario -> {
                     var auth = new UsernamePasswordAuthenticationToken(
-                            usuario,
+                            usuario.getCorreo(),
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()))
                     );
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 });
             }
+
+            filterChain.doFilter(request, response);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"code\":\"TOKEN_EXPIRADO\",\"message\":\"El token ha expirado\"}");
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"code\":\"TOKEN_INVALIDO\",\"message\":\"Token inválido\"}");
         }
-        filterChain.doFilter(request, response);
+    }
+    private String resolveToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        for (Cookie cookie : cookies) {
+            if ("accessToken".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 }

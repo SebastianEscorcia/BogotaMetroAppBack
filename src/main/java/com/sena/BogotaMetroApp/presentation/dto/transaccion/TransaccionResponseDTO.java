@@ -15,12 +15,10 @@ public class TransaccionResponseDTO {
     private BigDecimal valorPagado;
     private LocalDateTime fechaPago;
     private String descripcion;
-    private String referenciaPasarela;
     private MonedaEnum moneda;
     private MedioPagoEnum medioDePago;
     private Long idUsuario;
     private String nombreUsuario;
-    private Long idPasarela;
-    private String nombrePasarela;
+    private String numDocumentoUsuario;
     private Long idEstacion;
 }

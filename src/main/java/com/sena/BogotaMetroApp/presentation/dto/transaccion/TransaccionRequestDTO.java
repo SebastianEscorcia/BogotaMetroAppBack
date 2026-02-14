@@ -13,14 +13,10 @@ import java.math.BigDecimal;
 @Setter
 public class TransaccionRequestDTO {
     private Long idUsuario;
-    @NotNull(message = "El ID de la pasarela es obligatorio")
-    private Long idPasarela;
 
     @NotNull
     @Min(value = 1000, message = "La recarga mínima es de $1.000")
     private BigDecimal valorPagado;
-    private String descripcion;
-    private String referenciaPasarela;
     private MonedaEnum moneda;
     private MedioPagoEnum medioDePago;
 }
