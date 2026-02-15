@@ -47,6 +47,11 @@ public class CategoryFaqServiceImpl implements ICategoryFaqService {
         CategoryFaq categoryFaq = catFaqRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("CategoryFaq no encontrada con id: " + id));
 
+        // Validar que no exista otra categoría activa con el mismo nombre (excluyendo la actual)
+        if (catFaqRepository.existsByNameIgnoreCaseAndActiveTrueAndIdNot(dto.getName(), id)) {
+            throw new IllegalArgumentException("Ya existe otra categoría activa con el nombre: " + dto.getName());
+        }
+
         categoryFaq.setName(dto.getName());
         CategoryFaq updated = catFaqRepository.save(categoryFaq);
         categoryCacheService.invalidateCategoryFaqsCache();

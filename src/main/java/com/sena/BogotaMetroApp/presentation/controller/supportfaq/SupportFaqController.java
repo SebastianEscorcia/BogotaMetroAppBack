@@ -14,10 +14,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/support-faqs")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('SOPORTE')")
 public class SupportFaqController {
     private final ISupportFaqService supportFaqService;
 
+    @PreAuthorize("hasAnyRole('SOPORTE', 'ADMIN')")
     @PostMapping
     public ResponseEntity<SupportFaqResponseDTO> createSupportFaq(@RequestBody SupportFaqRequestDTO dto) {
         SupportFaqResponseDTO response = supportFaqService.createSupportFaq(dto);
@@ -29,7 +29,7 @@ public class SupportFaqController {
         SupportFaqResponseDTO response = supportFaqService.getSupportFaqById(id);
         return ResponseEntity.ok(response);
     }
-    @PreAuthorize("hasRole('PASAJERO')")
+    @PreAuthorize("hasAnyRole('PASAJERO','SOPORTE')")
     @GetMapping
     public ResponseEntity<List<SupportFaqResponseDTO>> getAllActiveSupportFaqs() {
         List<SupportFaqResponseDTO> response = supportFaqService.getAllActiveSupportFaqs();
@@ -42,6 +42,7 @@ public class SupportFaqController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('SOPORTE', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<SupportFaqResponseDTO> updateSupportFaq(
             @PathVariable Long id,
@@ -50,6 +51,7 @@ public class SupportFaqController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('SOPORTE', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSupportFaq(@PathVariable Long id) {
         supportFaqService.deleteSupportFaq(id);

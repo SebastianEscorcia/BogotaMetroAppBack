@@ -14,11 +14,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/category-faqs")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('SOPORTE')")
 public class CategoryFaqController {
     private final ICategoryFaqService categoryFaqService;
 
-
+    @PreAuthorize("hasAnyRole('SOPORTE', 'ADMIN')")
     @PostMapping
     public ResponseEntity<CategoryFaqResponseDTO> createCategoryFaq(@RequestBody CategoryFaqRequestDTO dto) {
         CategoryFaqResponseDTO response = categoryFaqService.createCategoryFaq(dto);
@@ -30,13 +29,14 @@ public class CategoryFaqController {
         CategoryFaqResponseDTO response = categoryFaqService.getCategoryFaqById(id);
         return ResponseEntity.ok(response);
     }
-    @PreAuthorize("hasRole('PASAJERO')")
+    @PreAuthorize("hasAnyRole('PASAJERO','SOPORTE')")
     @GetMapping
     public ResponseEntity<List<CategoryFaqResponseDTO>> getAllActiveCategoryFaqs() {
         List<CategoryFaqResponseDTO> response = categoryFaqService.getAllActiveCategoryFaqs();
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('SOPORTE', 'ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryFaqResponseDTO> updateCategoryFaq(
             @PathVariable Long id,
@@ -45,6 +45,7 @@ public class CategoryFaqController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('SOPORTE', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategoryFaq(@PathVariable Long id) {
         categoryFaqService.deleteCategoryFaq(id);
