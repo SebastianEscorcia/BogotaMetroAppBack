@@ -12,4 +12,6 @@ public interface SupportFaqRepository extends JpaRepository<SupportFaq,Long> {
     Optional<SupportFaq> findByIdAndIsActiveTrue(Long id);
     List<SupportFaq> findAllByIsActiveTrue();
     List<SupportFaq> findAllByCategoryFaqIdAndIsActiveTrue(Long categoryId);
+    Boolean existsByQuestionIgnoreCaseAndCategoryFaqIdAndIsActiveTrue(String question, Long categoryId);
+    Boolean existsByQuestionIgnoreCaseAndCategoryFaqIdAndIsActiveTrueAndIdNot(String question, Long categoryId, Long id);
 }

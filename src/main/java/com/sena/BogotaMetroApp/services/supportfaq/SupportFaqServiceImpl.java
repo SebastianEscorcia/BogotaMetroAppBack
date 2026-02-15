@@ -32,6 +32,12 @@ public class SupportFaqServiceImpl implements ISupportFaqService {
     public SupportFaqResponseDTO createSupportFaq(SupportFaqRequestDTO dto) {
         CategoryFaq categoryFaq = categoryFaqRepository.findByIdAndActiveTrue(dto.getCategoryFaqId())
                 .orElseThrow(() -> new EntityNotFoundException("CategoryFaq no encontrada con id: " + dto.getCategoryFaqId()));
+
+        // Validar si ya existe una FAQ activa con la misma pregunta en la misma categoría
+        if (supportFaqRepository.existsByQuestionIgnoreCaseAndCategoryFaqIdAndIsActiveTrue(dto.getQuestion(), dto.getCategoryFaqId())) {
+            throw new IllegalArgumentException("Ya existe una FAQ activa con la misma pregunta en esta categoría");
+        }
+
         SupportFaq supportFaq = supportFaqMapper.toEntity(dto);
         supportFaq.setCategoryFaq(categoryFaq);
         supportFaq.setActive(true);
@@ -89,9 +95,21 @@ public class SupportFaqServiceImpl implements ISupportFaqService {
     }
 
     @Override
+    @Transactional
     public SupportFaqResponseDTO updateSupportFaq(Long id, SupportFaqRequestDTO dto) {
         SupportFaq supportFaq = supportFaqRepository.findByIdAndIsActiveTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("SupportFaq no encontrada con id: " + id));
+
+        // Determinar el categoryId a usar (el nuevo si se proporciona, o el actual)
+        Long categoryIdToValidate = dto.getCategoryFaqId() != null
+                ? dto.getCategoryFaqId()
+                : supportFaq.getCategoryFaq().getId();
+
+        // Validar si ya existe otra FAQ activa con la misma pregunta en la misma categoría
+        if (supportFaqRepository.existsByQuestionIgnoreCaseAndCategoryFaqIdAndIsActiveTrueAndIdNot(
+                dto.getQuestion(), categoryIdToValidate, id)) {
+            throw new IllegalArgumentException("Ya existe otra FAQ activa con la misma pregunta en esta categoría");
+        }
 
         if (dto.getCategoryFaqId() != null) {
             CategoryFaq categoryFaq = categoryFaqRepository.findByIdAndActiveTrue(dto.getCategoryFaqId())
