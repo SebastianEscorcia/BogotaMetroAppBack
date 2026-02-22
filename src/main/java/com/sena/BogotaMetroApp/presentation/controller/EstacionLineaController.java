@@ -4,6 +4,7 @@ import com.sena.BogotaMetroApp.presentation.dto.estacionlinea.EstacionLineaReque
 import com.sena.BogotaMetroApp.presentation.dto.estacionlinea.EstacionLineaResponseDTO;
 import com.sena.BogotaMetroApp.services.estacion.IEstacionLineaServices;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/estaciones-lineas")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('OPERADOR')")
 public class EstacionLineaController {
 
     private final IEstacionLineaServices service;

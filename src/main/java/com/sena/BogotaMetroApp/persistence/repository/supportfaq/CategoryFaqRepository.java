@@ -15,6 +15,6 @@ public interface CategoryFaqRepository extends JpaRepository<CategoryFaq,Long> {
     // Para validar duplicados al crear: busca si existe otra categoría activa con el mismo nombre
     boolean existsByNameIgnoreCaseAndActiveTrue(String name);
 
-    // Para validar duplicados al actualizar: busca si existe otra categoría activa con el mismo nombre, excluyendo el ID actual
+    // Para validar duplicados al actualizarPasajero: busca si existe otra categoría activa con el mismo nombre, excluyendo el ID actual
     boolean existsByNameIgnoreCaseAndActiveTrueAndIdNot(String name, Long id);
 }

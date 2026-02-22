@@ -10,8 +10,10 @@ import com.sena.BogotaMetroApp.persistence.repository.pasajero.PasajeroRepositor
 import com.sena.BogotaMetroApp.persistence.repository.transaccion.TransaccionRepository;
 import com.sena.BogotaMetroApp.presentation.dto.estacion.EstacionResponseDTO;
 import com.sena.BogotaMetroApp.services.estacion.IEstacionServices;
+import com.sena.BogotaMetroApp.services.exception.interrupcion.InterrupcionException;
 import com.sena.BogotaMetroApp.services.exception.pago.PagoException;
 import com.sena.BogotaMetroApp.services.horariosistema.IHorarioSistemaService;
+import com.sena.BogotaMetroApp.services.interrupcion.IInterrupcionServices;
 import com.sena.BogotaMetroApp.services.qr.IQrService;
 import com.sena.BogotaMetroApp.services.tarifasistema.ITarifaSistemaService;
 import com.sena.BogotaMetroApp.services.tarjetavirtual.ItarjetaVirtualService;
@@ -29,21 +31,25 @@ public class TorniqueteServiceImpl implements ITorniqueteService {
     private final TransaccionRepository transaccionRepository;
     private final IEstacionServices estacionServices;
     private final ITarifaSistemaService tarifaService;
-
     private final IHorarioSistemaService horarioService;
-
     private final IQrService qrService;
-
     private final PasajeroRepository pasajeroRepository;
+    private final IInterrupcionServices interrupcionService;
 
     //private static final BigDecimal TARIFA_METRO = new BigDecimal("2950");
 
     @Override
     public void procesarIngreso(String contenidoQr, Long idEstacion) {
         Qr qr = qrService.validarYObtenerPorContenido(contenidoQr);
-        //  BigDecimal tarifaActual = tarifaService.obtenerValorTarifaActual();
+
+        // Validar horario del sistema
         if (!horarioService.validarHorarioActual()) {
             throw new RuntimeException("Ingreso no permitido: Fuera del horario de operación del Metro");
+        }
+
+        // Validar si la estación tiene interrupciones activas
+        if (interrupcionService.tieneInterrupcionActiva(idEstacion)) {
+            throw new InterrupcionException(ErrorCodeEnum.ESTACION_INTERRUPCION_ACTIVA);
         }
 
         Usuario usuario = qr.getUsuario();
@@ -67,7 +73,6 @@ public class TorniqueteServiceImpl implements ITorniqueteService {
         cobro.setFecha(LocalDateTime.now());
         cobro.setDescripcion("Ingreso al sistema de metro" + " en la estación " + estacion.getNombre());
         cobro.setEstacionId(idEstacion);
-
         transaccionRepository.save(cobro);
 
         qrService.consumirQr(qr);

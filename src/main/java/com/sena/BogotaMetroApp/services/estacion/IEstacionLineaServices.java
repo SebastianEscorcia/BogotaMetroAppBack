@@ -11,4 +11,5 @@ public interface IEstacionLineaServices {
     List<EstacionLineaResponseDTO> listar();
 
     void eliminar(Long idLinea, Long idEstacion);
+
 }

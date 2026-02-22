@@ -46,9 +46,9 @@ public class RecargaRegistradaListener {
             nuevoSaldo = tarjeta.getSaldo();
 
         } catch (Exception e) {
-            log.error("Error al actualizar saldo. Recarga ID: {}, Error: {}", event.idRecarga(), e.getMessage(), e);
-
+            log.error("Error al actualizarPasajero saldo. Recarga ID: {}, Error: {}", event.idRecarga(), e.getMessage(), e);
         }
+
         try {
 
             RecargaNotificacionDTO notificacion = RecargaNotificacionDTO.builder()

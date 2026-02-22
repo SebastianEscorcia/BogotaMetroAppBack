@@ -40,6 +40,8 @@ public class UsuarioMapper {
             dto.setTelefono(usuario.getDatosPersonales().getTelefono());
             dto.setTipoDocumento(usuario.getDatosPersonales().getTipoDocumento());
             dto.setNumDocumento(usuario.getDatosPersonales().getNumDocumento());
+            dto.setDireccion(usuario.getDatosPersonales().getDireccion());
+            dto.setFechaNacimiento(usuario.getDatosPersonales().getFechaNacimiento());
         }
 
         return dto;

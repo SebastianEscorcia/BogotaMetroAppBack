@@ -15,4 +15,6 @@ public class InterrupcionUpdateDTO {
     private LocalDateTime inicio;
     private LocalDateTime fin;
     private EstadoInterrupcionEnum estado;
+    private Long idEstacion;
+    private Long idLinea;
 }

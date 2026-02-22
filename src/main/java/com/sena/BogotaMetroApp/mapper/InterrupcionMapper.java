@@ -10,10 +10,17 @@ public class InterrupcionMapper {
 
         InterrupcionResponseDTO dto = new InterrupcionResponseDTO();
         dto.setId(inter.getId());
-        dto.setIdEstacion(inter.getEstacion().getId());
-        dto.setNombreEstacion(inter.getEstacion().getNombre());
-        dto.setIdLinea(inter.getLinea().getId());
-        dto.setNombreLinea(inter.getLinea().getNombre());
+
+        if (inter.getEstacion() != null) {
+            dto.setIdEstacion(inter.getEstacion().getId());
+            dto.setNombreEstacion(inter.getEstacion().getNombre());
+        }
+
+        if (inter.getLinea() != null) {
+            dto.setIdLinea(inter.getLinea().getId());
+            dto.setNombreLinea(inter.getLinea().getNombre());
+        }
+
         dto.setTipo(inter.getTipo());
         dto.setDescripcion(inter.getDescripcion());
         dto.setInicio(inter.getInicio());

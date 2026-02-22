@@ -1,13 +1,16 @@
 package com.sena.BogotaMetroApp.presentation.controller.pasajero;
 
 
+import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroResponseDTO;
+import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroUpdateDTO;
 import com.sena.BogotaMetroApp.presentation.dto.pasajero.RegistroPasajeroUnificadoDTO;
 import com.sena.BogotaMetroApp.services.pasajero.IPasajeroService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -16,7 +19,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/pasajero", produces = "application/json")
+@RequestMapping(value = "/api/pasajero", produces = "application/json")
 @RequiredArgsConstructor
 public class PasajeroController {
     private final IPasajeroService pasajeroService;
@@ -53,6 +56,17 @@ public class PasajeroController {
     public ResponseEntity<PasajeroResponseDTO> obtenerMisDatos() {
         String correoAutenticado = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok(pasajeroService.obtenerPorCorreo(correoAutenticado));
+    }
+    @PreAuthorize("hasRole('PASAJERO')")
+    @PutMapping
+    public ResponseEntity<PasajeroResponseDTO> actualizar( @Valid @RequestBody PasajeroUpdateDTO dto) {
+
+        String correo = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        return ResponseEntity.ok(pasajeroService.actualizar(correo, dto));
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Servicio para manejar la actividad de sesiones de chat en Redis.
- * Permite actualizar el temporizador de actividad y eliminarlo al cerrar la sesión.
+ * Permite actualizarPasajero el temporizador de actividad y eliminarlo al cerrar la sesión.
  * por inactividad
  */
 @Service

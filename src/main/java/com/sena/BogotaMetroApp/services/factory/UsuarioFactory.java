@@ -21,8 +21,7 @@ public class UsuarioFactory {
     public Usuario crearDesdeRegistro(RegistroUsuarioBaseDTO dto, String nombreRol) {
         validarCorreoUnico(nombreRol);
 
-        Role rol = roleRepository.findByNombre(nombreRol)
-                .orElseThrow(() -> new RuntimeException("El rol '" + nombreRol + "' no existe en el sistema"));
+        Role rol = buscarRol(nombreRol);
 
         Usuario usuario = new Usuario();
         usuario.setCorreo(dto.getCorreo());
@@ -33,12 +32,12 @@ public class UsuarioFactory {
         return usuario;
     }
 
+
     public Usuario crearAdminDesdeRegistro(UsuarioRequestDTO dto, String nombreRol) {
 
         validarCorreoUnico(dto.getCorreo());
+        Role rol = buscarRol(nombreRol);
 
-        Role rol = roleRepository.findByNombre(nombreRol)
-                .orElseThrow(() -> new RuntimeException("El rol '" + nombreRol + "' no existe en el sistema"));
 
         Usuario usuario = new Usuario();
         usuario.setCorreo(dto.getCorreo());
@@ -53,6 +52,11 @@ public class UsuarioFactory {
         if (usuarioRepository.existsByCorreo(correo)) {
             throw new RuntimeException("Ya existe un usuario registrado con el correo: " + correo);
         }
+    }
+
+    private Role buscarRol(String nombreRol) {
+        return roleRepository.findByNombre(nombreRol)
+                .orElseThrow(() -> new RuntimeException("El rol '" + nombreRol + "' no existe en el sistema"));
     }
 }
 

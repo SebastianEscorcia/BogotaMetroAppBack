@@ -52,6 +52,9 @@ public enum ErrorCodeEnum implements ErrorCode {
     INTERRUPCION_ESTACION_LINEA_REQ("INTERRUPCION_REQ", "Debe especificar al menos una Estación o una Línea"),
     INTERRUPCION_YA_ELIMINADA("INTERRUPCION_DELETED", "No se puede modificar una interrupción que ya fue eliminada"),
     INTERRUPCION_TIPO_INVALIDO("INTERRUPCION_TYPE_INVALID", "El tipo de interrupción no es válido"),
+    INTERRUPCION_YA_SOLUCIONADA("INTERRUPCION_SOLUCIONADA", "No se puede modificar una interrupción que ya fue solucionada"),
+    // Estacion Errors
+    ESTACION_INTERRUPCION_ACTIVA("ESTACION_INTERRUPCION", "Ingreso no permitido: La estación tiene una interrupción activa"),
 
     // Linea Errors
     LINEA_NOT_FOUND("LINEA_NOT_FOUND", "La línea solicitada no existe"),

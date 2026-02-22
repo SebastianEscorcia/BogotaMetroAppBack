@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -20,4 +21,6 @@ public class PasajeroResponseDTO {
     private String numDocumento;
     private String numTarjetaVirtual;
     private BigDecimal saldo;
+    private LocalDate fechaNacimiento;
+    private String direccion;
 }

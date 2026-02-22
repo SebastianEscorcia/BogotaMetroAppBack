@@ -1,10 +1,11 @@
 package com.sena.BogotaMetroApp.persistence.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.sena.BogotaMetroApp.presentation.dto.common.IDatosPersonalesUpdate;
+import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroUpdateDTO;
 import com.sena.BogotaMetroApp.utils.enums.TipoDocumentoEnum;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -31,4 +32,28 @@ public class DatosPersonales {
     private String numDocumento;
     private LocalDate fechaNacimiento;
     private String direccion;
+
+
+    public void actualizarDatos(IDatosPersonalesUpdate nuevosDatos) {
+        this.nombreCompleto = nuevosDatos.getNombreCompleto();
+        this.telefono = nuevosDatos.getTelefono();
+        this.fechaNacimiento = nuevosDatos.getFechaNacimiento();
+        this.direccion = nuevosDatos.getDireccion();
+    }
+    public void actualizarPasajero(
+            PasajeroUpdateDTO dto
+    ) {
+
+        if (dto.nombreCompleto() != null && !dto.nombreCompleto().isBlank()) {
+            this.nombreCompleto = dto.nombreCompleto();
+        }
+
+        if (dto.fechaNacimiento() != null) {
+            this.fechaNacimiento = dto.fechaNacimiento();
+        }
+
+        if (dto.direccion() != null && !dto.direccion().isBlank()) {
+            this.direccion = dto.direccion();
+        }
+    }
 }

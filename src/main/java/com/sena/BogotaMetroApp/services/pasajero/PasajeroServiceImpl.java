@@ -104,17 +104,13 @@ public class PasajeroServiceImpl implements IPasajeroService {
     }
 
     @Override
-    public PasajeroResponseDTO actualizar(Long id, PasajeroUpdateDTO dto) {
+    @Transactional
+    public PasajeroResponseDTO actualizar(String correo, PasajeroUpdateDTO dto) {
+        Pasajero p = pasajeroRepository.findByUsuarioCorreo(correo).orElseThrow(() -> new PasajeroException(ErrorCodeEnum.PASAJERO_NO_ENCONTRADO));
 
-        Pasajero pasajero = pasajeroRepository.findById(id)
-                .orElseThrow(() -> new PasajeroException(ErrorCodeEnum.PASAJERO_NO_ENCONTRADO));
-
-        mapper.updateEntity(dto, pasajero);
-
-        pasajeroRepository.save(pasajero);
-
-        return mapper.toDTO(pasajero);
+        p.actualizarDatosPersonales(dto);
+        pasajeroRepository.save(p);
+        return mapper.toDTO(p);
     }
-
 
 }

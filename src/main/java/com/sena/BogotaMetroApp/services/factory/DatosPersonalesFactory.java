@@ -24,17 +24,10 @@ public class DatosPersonalesFactory {
     }
 
     public void actualizarDatos(Usuario usuario, IDatosPersonalesUpdate dto) {
-
-        usuario.setCorreo(dto.getCorreo());
-
-        if (usuario.getDatosPersonales() != null) {
-            DatosPersonales dp = usuario.getDatosPersonales();
-            dp.setNombreCompleto(dto.getNombreCompleto());
-            dp.setTelefono(dto.getTelefono());
-            dp.setTipoDocumento(dto.getTipoDocumento());
-            dp.setNumDocumento(dto.getNumDocumento());
-            dp.setDireccion(dto.getDireccion());
-            dp.setFechaNacimiento(dto.getFechaNacimiento());
+        DatosPersonales dp = usuario.getDatosPersonales();
+        if (dp == null) {
+            throw new IllegalStateException("El usuario no tiene datos personales asociados");
         }
+        dp.actualizarDatos(dto);
     }
 }

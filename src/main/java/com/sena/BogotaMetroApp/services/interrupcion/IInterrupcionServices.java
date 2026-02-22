@@ -16,4 +16,11 @@ public interface IInterrupcionServices {
     void marcarComoSolucionada(Long id);
 
     InterrupcionResponseDTO actualizar(Long id, InterrupcionUpdateDTO dto);
+
+    /**
+     * Verifica si una estación tiene interrupciones activas
+     * @param idEstacion ID de la estación a verificar
+     * @return true si la estación tiene interrupciones activas, false en caso contrario
+     */
+    boolean tieneInterrupcionActiva(Long idEstacion);
 }

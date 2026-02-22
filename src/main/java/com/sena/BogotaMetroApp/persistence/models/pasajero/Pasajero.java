@@ -2,10 +2,13 @@ package com.sena.BogotaMetroApp.persistence.models.pasajero;
 
 import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
+import com.sena.BogotaMetroApp.presentation.dto.pasajero.PasajeroUpdateDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.Persistable;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "pasajeros")
@@ -38,5 +41,13 @@ public class Pasajero implements Persistable<Long> {
     @PostLoad
     void markNotNew() {
         this.isNew = false;
+    }
+
+    public void actualizarDatosPersonales(
+            PasajeroUpdateDTO dto
+    ) {
+
+        this.usuario.getDatosPersonales()
+                .actualizarPasajero(dto);
     }
 }
