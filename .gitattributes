@@ -1,8 +1,4 @@
 /gradlew text eol=lf
 *.bat text eol=crlf
 *.jar binary
-*.env
-*/.env
-.gradlew
-build/
-.idea/
+
