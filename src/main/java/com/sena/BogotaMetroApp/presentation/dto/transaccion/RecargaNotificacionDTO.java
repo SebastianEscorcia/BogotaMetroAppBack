@@ -1,6 +1,7 @@
 package com.sena.BogotaMetroApp.presentation.dto.transaccion;
 
 import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
+import com.sena.BogotaMetroApp.utils.enums.TipoTransaccion;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecargaNotificacionDTO {
-    private String tipo;
+    private TipoTransaccion tipo;
     private Long idRecarga;
     private BigDecimal monto;
     private BigDecimal nuevoSaldo;

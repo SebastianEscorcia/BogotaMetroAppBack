@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface TarjetaVirtualRepository extends JpaRepository<TarjetaVirtual, Long> {
     Optional<TarjetaVirtual> findByPasajeroUsuarioId(Long idUsuario);
-
+    Optional<TarjetaVirtual> findTarjetaVirtualByPasajeroUsuarioDatosPersonalesTelefono(String telefono);
 }

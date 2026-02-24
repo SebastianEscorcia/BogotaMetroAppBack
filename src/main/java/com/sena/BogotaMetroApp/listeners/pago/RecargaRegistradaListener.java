@@ -5,6 +5,7 @@ import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.RecargaNotificacionDTO;
 import com.sena.BogotaMetroApp.services.notificationwebsocket.transaccion.ITransaccionNotifier;
 import com.sena.BogotaMetroApp.services.tarjetavirtual.ItarjetaVirtualService;
+import com.sena.BogotaMetroApp.utils.enums.TipoTransaccion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -52,7 +53,7 @@ public class RecargaRegistradaListener {
         try {
 
             RecargaNotificacionDTO notificacion = RecargaNotificacionDTO.builder()
-                    .tipo("RECARGA_EXITOSA")
+                    .tipo(TipoTransaccion.RECARGA_EXITOSA)
                     .idRecarga(event.idRecarga())
                     .monto(event.monto())
                     .nuevoSaldo(nuevoSaldo)

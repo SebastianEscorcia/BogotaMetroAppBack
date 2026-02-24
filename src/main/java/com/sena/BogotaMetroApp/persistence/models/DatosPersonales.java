@@ -26,6 +26,7 @@ public class DatosPersonales {
     private Usuario usuario;
 
     private String nombreCompleto;
+    @Column(name = "telefono", unique = true)
     private String telefono;
     @Enumerated(EnumType.STRING)
     private TipoDocumentoEnum tipoDocumento;

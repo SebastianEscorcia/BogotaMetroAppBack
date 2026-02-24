@@ -46,6 +46,9 @@ public class PasajeroServiceImpl implements IPasajeroService {
         usuarioRepository.findByDatosPersonales_NumDocumento(dto.getNumDocumento()).ifPresent(u -> {
             throw new PasajeroException(ErrorCodeEnum.PASAJERO_YA_EXISTE);
         });
+        usuarioRepository.findByDatosPersonales_Telefono(dto.getTelefono()).ifPresent(u -> {
+            throw new PasajeroException(ErrorCodeEnum.PASAJERO_YA_EXISTE);
+        });
 
         //El cascade = CascadeType.ALL hace que cuando guarde al usuario, TODO se guarde automáticamente.
         Usuario usuario = usuarioFactory.crearDesdeRegistro(dto, RoleEnum.PASAJERO.toString());

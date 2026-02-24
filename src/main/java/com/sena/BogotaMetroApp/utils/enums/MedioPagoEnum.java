@@ -6,6 +6,7 @@ public enum MedioPagoEnum {
     PSE,
     NEQUI,
     EFECTIVO,
-    SALDO_VIRTUAL
-
+    SALDO_VIRTUAL,
+    TRANSFERENCIA_ENVIADA,
+    TRANSFERENCIA_RECIBIDA
 }

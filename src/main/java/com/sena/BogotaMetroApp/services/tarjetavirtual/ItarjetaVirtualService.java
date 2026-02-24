@@ -15,4 +15,5 @@ public interface ItarjetaVirtualService {
      * Recarga saldo a la tarjeta del usuario.
      */
     TarjetaVirtual recargarSaldo(Long idUsuario, BigDecimal valorARecargar);
+
 }

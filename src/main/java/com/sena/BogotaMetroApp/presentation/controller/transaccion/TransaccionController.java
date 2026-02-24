@@ -3,6 +3,7 @@ package com.sena.BogotaMetroApp.presentation.controller.transaccion;
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 
 import com.sena.BogotaMetroApp.persistence.models.transaccion.Recarga;
+import com.sena.BogotaMetroApp.presentation.dto.transaccion.PasarSaldoRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionResponseDTO;
 import com.sena.BogotaMetroApp.security.TransaccionSecurityService;
@@ -10,12 +11,15 @@ import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;
 import com.sena.BogotaMetroApp.services.transaccion.ITransaccionService;
 import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -93,6 +97,7 @@ public class TransaccionController {
     public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorNumDocumento(@PathVariable String numDocumento) {
         return ResponseEntity.ok(transaccionService.obtenerTransaccionPorNumDocumentoUsuario(numDocumento));
     }
+
     @PreAuthorize("hasRole('SOPORTE')")
     @GetMapping("/usuario/nombre/{nombre}")
     public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorNombre(@PathVariable String nombre) {
@@ -100,12 +105,25 @@ public class TransaccionController {
     }
 
 
-
     @GetMapping("/usuario/{idUsuario}/fechas")
-        public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorUsuarioYFechas(
+    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorUsuarioYFechas(
             @PathVariable Long idUsuario,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin) {
         return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorUsuarioYFechas(idUsuario, fechaInicio, fechaFin));
+    }
+
+    @PreAuthorize("hasRole('PASAJERO')")
+    @PostMapping("/pasar-saldo")
+    public ResponseEntity<?> pasarSaldo(
+            @Valid @RequestBody PasarSaldoRequestDTO dto
+
+    ) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long idUsuario = transaccionSecurityService.obtenerIdUsuarioAutenticado(authentication);
+        String resultado = transaccionService.PasarSaldo(dto.getNumTelefono(), dto.getValor(), idUsuario);
+        return ResponseEntity.ok(resultado);
+
     }
 }

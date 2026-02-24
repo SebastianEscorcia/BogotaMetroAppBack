@@ -23,7 +23,7 @@ public enum ErrorCodeEnum implements ErrorCode {
 
     // Pago Errors
     PAGO_NOT_FOUND("PAGO_NOT_FOUND", "Pago no encontrado en el sistema"),
-    PAGO_INVALID("PAGO_INVALID", "Pago inválido"),
+    PAGO_INVALID("PAGO_INVALID", "Pago inválido valor o formato incorrecto"),
     PAGO_DUPLICADO("PAGO_DUPLICADO", "Ya existe un pago con esta referencia"),
     SALDO_INSUFICIENTE("SALDO_INSUFICIENTE", "Saldo Insuficiente"),
 

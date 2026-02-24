@@ -1,0 +1,12 @@
+package com.sena.BogotaMetroApp.utils.enums;
+
+public enum TipoTransaccion {
+    RECARGA_EXITOSA,
+    RECARGA_FALLIDA,
+    COBRO_PASAJE_EXITOSO,
+    COBRO_PASAJE_FALLIDO,
+    DEVOLUCION_PASAJE_EXITOSA,
+    DEVOLUCION_PASAJE_FALLIDA,
+    SALDO_ENVIADO,
+    SALDO_RECIBIDO,
+}
