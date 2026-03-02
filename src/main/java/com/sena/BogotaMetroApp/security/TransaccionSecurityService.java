@@ -21,22 +21,30 @@ public class TransaccionSecurityService {
     public boolean esDuenioOEsSoporte(Long idUsuarioSolicitado) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth == null || !auth.isAuthenticated()) return false;
+        if (!estaAutenticado(auth)) return false;
 
-
-        if (auth.getAuthorities().contains(new SimpleGrantedAuthority(RoleEnum.SOPORTE.toString()))) {
-            return true;
-        }
+        if (!esSoporte(auth)) return true;
 
         Long idAutenticado = obtenerIdUsuarioAutenticado(auth);
 
         return idAutenticado.equals(idUsuarioSolicitado);
     }
 
+    private boolean estaAutenticado(Authentication auth) {
+        return auth != null && auth.isAuthenticated();
+    }
+
+    private boolean esSoporte(Authentication auth) {
+        return auth.getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals(RoleEnum.SOPORTE.name()));
+    }
+
     // Método auxiliar para extraer el ID de forma segura
     public Long obtenerIdUsuarioAutenticado(Authentication auth) {
-        if (auth.getPrincipal() instanceof Usuario) {
-            return ((Usuario) auth.getPrincipal()).getId();
+        Object principal = auth.getPrincipal();
+        if (principal instanceof Usuario usuario) {
+            return  usuario.getId();
         }
         // Fallback si el principal es solo el correo (String)
         return usuarioRepository.findByCorreo(auth.getName())

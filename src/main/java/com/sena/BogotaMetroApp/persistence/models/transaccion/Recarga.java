@@ -16,4 +16,8 @@ public class Recarga extends Transaccion {
     @Column(name = "medio_de_pago", nullable = false)
     private MedioPagoEnum medioDePago;
 
+    @Override
+    public MedioPagoEnum obtenerMedioDePago() {
+        return medioDePago;
+    }
 }

@@ -8,12 +8,11 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface TransaccionRepository extends JpaRepository<Transaccion, Long> {
 
     // Buscar pagos por usuario
-    List<Transaccion> findByUsuarioId(Long idUsuario);
+    List<Transaccion> findByUsuarioIdOrderByFechaDesc(Long idUsuario);
     List<Transaccion> findByUsuarioDatosPersonalesNumDocumento(String numDocumento);
     List<Transaccion> findByUsuarioDatosPersonalesNombreCompleto(String nombre);
 

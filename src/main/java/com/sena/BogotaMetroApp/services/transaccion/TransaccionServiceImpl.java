@@ -72,7 +72,7 @@ public class TransaccionServiceImpl implements ITransaccionService {
 
     @Override
     public List<TransaccionResponseDTO> obtenerTransaccionesPorUsuario(Long idUsuario) {
-        return transaccionRepository.findByUsuarioId(idUsuario)
+        return transaccionRepository.findByUsuarioIdOrderByFechaDesc(idUsuario)
                 .stream()
                 .map(transaccionMapper::toDTO)
                 .collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class TransaccionServiceImpl implements ITransaccionService {
         validarTarjetaActiva(tarjetaDestino);
 
         if (tarjetaOrigen.getIdTarjeta().equals(tarjetaDestino.getIdTarjeta())) {
-            throw new RuntimeException("No puedes transferirte saldo a ti mismo.");
+            throw new PagoException(ErrorCodeEnum.RECARGA_PARA_TI);
         }
 
         tarjetaVirtualService.descontarSaldo(idUsuario, valor);
@@ -151,7 +151,6 @@ public class TransaccionServiceImpl implements ITransaccionService {
         tarjetaVirtualRepository.save(tarjetaDestino);
 
         PasarSaldo transaccion = crearTransaccionPasarSaldo(tarjetaOrigen, tarjetaDestino, valor, numTelefono);
-        transaccion.setMedioDePago(MedioPagoEnum.TRANSFERENCIA_ENVIADA);
 
         PasarSaldo transaccionGuardada = transaccionRepository.save(transaccion);
 
@@ -192,6 +191,7 @@ public class TransaccionServiceImpl implements ITransaccionService {
         transaccion.setTarjetaVirtual(tarjetaOrigen);
         transaccion.setTarjetaOrigen(tarjetaOrigen);
         transaccion.setTarjetaDestino(tarjetaDestino);
+        transaccion.setMedioDePago(MedioPagoEnum.TRANSFERENCIA_ENVIADA);
         return transaccion;
     }
 }

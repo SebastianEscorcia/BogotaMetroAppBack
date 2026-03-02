@@ -1,5 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.models.transaccion;
 
+import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -15,4 +16,8 @@ public class CobroPasaje extends Transaccion {
     @Column(name="estacion_id")
     private Long estacionId;
 
+    @Override
+    public MedioPagoEnum obtenerMedioDePago() {
+        return MedioPagoEnum.PASAJES;
+    }
 }
