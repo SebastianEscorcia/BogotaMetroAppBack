@@ -28,11 +28,9 @@ public class TransaccionMapper {
 
     /**
      * Retorna la entidad Recarga lista para persistir.
-     *
      * NOTA IMPORTANTE sobre diseño Event-Driven:
      * La tarjeta se asocia aquí porque es REQUERIDA por la BD para guardar la transacción.
      * Esto NO viola SRP porque asociar la tarjeta es parte de "crear la transacción".
-     *
      * La ACTUALIZACIÓN del saldo (lógica de negocio) sí se delega al listener
      * RecargaRegistradaListener, manteniendo el desacoplamiento.
      */

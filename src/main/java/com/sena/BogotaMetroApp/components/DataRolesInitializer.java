@@ -15,7 +15,7 @@ public class DataRolesInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (roleRepository.count() == 0) {
             for (RoleEnum role : RoleEnum.values()) {
                 crearRolSiNoExiste(role.toString());
@@ -25,7 +25,7 @@ public class DataRolesInitializer implements CommandLineRunner {
 
     private void crearRolSiNoExiste(String nombreRol) {
         if (roleRepository.findByNombre(nombreRol).isEmpty()) {
-            Role rol = new Role();
+            Role rol = new Role(nombreRol);
             rol.setNombre(nombreRol);
             roleRepository.save(rol);
         }

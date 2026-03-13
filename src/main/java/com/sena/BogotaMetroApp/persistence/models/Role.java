@@ -23,9 +23,8 @@ public class Role {
 
     private Boolean isActive = true;
 
-    public Role(String nombre, Boolean isActive) {
+    public Role(String nombre) {
         this.nombre = nombre;
-        this.isActive = isActive;
     }
     public boolean isActive (){
         return  this.isActive;
