@@ -23,10 +23,16 @@ import com.sena.BogotaMetroApp.utils.enums.EstadoTarjetaEnum;
 import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,6 +83,7 @@ public class TransaccionServiceImpl implements ITransaccionService {
                 .map(transaccionMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public List<TransaccionResponseDTO> obtenerTransaccionesPorFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
@@ -164,6 +171,23 @@ public class TransaccionServiceImpl implements ITransaccionService {
         ));
 
         return "Transferencia realizada exitosamente.";
+    }
+
+    @Override
+    public List<TransaccionResponseDTO> obtenerTransaccionesPorUsuarioDeFechasActuales(Long idUsuario) {
+        LocalDate ahora = LocalDate.now();
+        LocalDateTime inicio = ahora.atStartOfDay();
+        LocalDateTime fin = ahora.plusDays(1).atStartOfDay();
+
+        return transaccionRepository.findByUsuarioIdAndFechaGreaterThanEqualAndFechaLessThan(idUsuario, inicio, fin).stream().map(transaccionMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<TransaccionResponseDTO> obtenerTransaccionesPorUsuarioYFechasPasadas(Long idUsuario, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fecha"));
+        //Sort.by("fechaPago").descending()
+        LocalDateTime inicioDiaHoy = LocalDate.now().atStartOfDay();
+        return transaccionRepository.findTransaccionesPasadasPorUsuario(idUsuario, inicioDiaHoy, pageable).map(transaccionMapper::toDTO);
     }
 
     private void validarRecarga(BigDecimal valor) {

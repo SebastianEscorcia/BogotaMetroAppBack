@@ -5,6 +5,7 @@ import com.sena.BogotaMetroApp.persistence.models.transaccion.Recarga;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.TransaccionResponseDTO;
 import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,4 +27,7 @@ public interface ITransaccionService {
     List<TransaccionResponseDTO> obtenerTransaccionPorNombre(String nombre);
     List<Recarga> obtenerRecargasPorMedioPago(MedioPagoEnum medioPago);
     String PasarSaldo(String numTelefono, BigDecimal valor, Long idUsuario);
+
+    List<TransaccionResponseDTO> obtenerTransaccionesPorUsuarioDeFechasActuales(Long idUsuario);
+    Page<TransaccionResponseDTO> obtenerTransaccionesPorUsuarioYFechasPasadas(Long idUsuario, int page, int size);
 }

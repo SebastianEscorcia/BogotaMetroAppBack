@@ -13,6 +13,7 @@ import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +65,17 @@ public class TransaccionController {
         return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorUsuario(idUsuario));
     }
 
+    @PreAuthorize("@transaccionSecurityService.esDuenioOEsSoporte(#idUsuario)")
+    @GetMapping("/usuario/{idUsuario}/fechas-actual")
+    public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosDeUsuarioPorFechaActual(@PathVariable Long idUsuario) {
+        return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorUsuarioDeFechasActuales(idUsuario));
+    }
+    @PreAuthorize("hasRole('PASAJERO')")
+    @GetMapping("/usuario/{idUsuario}/transacciones-fechas-pasadas")
+    public ResponseEntity<Page<TransaccionResponseDTO>> obtenerPagosDeUsuarioPorFechasPasadas(@PathVariable Long idUsuario, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(transaccionService.obtenerTransaccionesPorUsuarioYFechasPasadas(idUsuario, page, size));
+    }
+
     @PreAuthorize("hasRole('SOPORTE')")
     @GetMapping("/fechas")
     public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosGlobalesPorFechas(
@@ -104,7 +116,7 @@ public class TransaccionController {
         return ResponseEntity.ok(transaccionService.obtenerTransaccionPorNombre(nombre));
     }
 
-
+    @PreAuthorize("@transaccionSecurityService.esDuenioOEsSoporte(#idUsuario)")
     @GetMapping("/usuario/{idUsuario}/fechas")
     public ResponseEntity<List<TransaccionResponseDTO>> obtenerPagosPorUsuarioYFechas(
             @PathVariable Long idUsuario,
@@ -115,7 +127,7 @@ public class TransaccionController {
 
     @PreAuthorize("hasRole('PASAJERO')")
     @PostMapping("/pasar-saldo")
-    public ResponseEntity<?> pasarSaldo(
+    public ResponseEntity<String> pasarSaldo(
             @Valid @RequestBody PasarSaldoRequestDTO dto
 
     ) {
