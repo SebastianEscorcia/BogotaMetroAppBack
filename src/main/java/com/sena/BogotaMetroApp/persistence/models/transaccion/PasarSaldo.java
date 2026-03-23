@@ -22,4 +22,9 @@ public class PasarSaldo extends Transaccion {
     @Enumerated(EnumType.STRING)
     @Column(name = "medio_de_pago", nullable = false)
     private MedioPagoEnum medioDePago;
+
+    @Override
+    public MedioPagoEnum obtenerMedioDePago() {
+        return medioDePago;
+    }
 }

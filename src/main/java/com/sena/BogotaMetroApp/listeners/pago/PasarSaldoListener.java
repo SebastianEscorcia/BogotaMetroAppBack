@@ -25,7 +25,7 @@ public class PasarSaldoListener {
         try {
             RecargaNotificacionDTO recargaNotificacionDTO = RecargaNotificacionDTO.builder(
 
-            ).tipo(TipoTransaccion.SALDO_ENVIADO).idRecarga(event.idRecarga()).monto(event.monto()).nuevoSaldo(event.nuevoSaldoPasajeroDestino()).medioPago(event.medioPago()).fechaTransaccion(LocalDateTime.now()).mensaje("Te han realizado una recarga de " + "$" + event.monto() + "COP").build();
+            ).tipo(TipoTransaccion.SALDO_RECIBIDO).idRecarga(event.idRecarga()).monto(event.monto()).nuevoSaldo(event.nuevoSaldoPasajeroDestino()).medioPago(event.medioPago()).fechaTransaccion(LocalDateTime.now()).mensaje("Te han realizado una recarga de " + "$" + event.monto() + "COP").build();
             transaccionNotifier.notificarRecargaExitosa(event.correPasajeroDestino(), recargaNotificacionDTO);
         } catch (Exception e) {
             log.error("Error al enviar notificación. Usuario: {}, Error: {}",

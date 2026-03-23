@@ -4,6 +4,7 @@ import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 
 
+import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import com.sena.BogotaMetroApp.utils.enums.MonedaEnum;
 import jakarta.persistence.*;
 
@@ -45,4 +46,6 @@ public abstract class Transaccion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tarjeta_fk", nullable = false)
     private TarjetaVirtual tarjetaVirtual;
+
+    public abstract MedioPagoEnum obtenerMedioDePago();
 }
