@@ -27,7 +27,7 @@ public class CorsConfig {
                 "http://127.0.0.1:3000",
                 "http://localhost",
                 "http://127.0.0.1",
-                "https://bogota-metro-app-frontend-fxxfruelg-sebastianescorcias-projects.vercel.app"
+                "https://bogota-metro-app-frontend.vercel.app"
         ));
 
         // Métodos HTTP permitidos
