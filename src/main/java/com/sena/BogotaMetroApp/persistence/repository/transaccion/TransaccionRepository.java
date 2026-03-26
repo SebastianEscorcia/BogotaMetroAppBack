@@ -34,6 +34,8 @@ public interface TransaccionRepository extends JpaRepository<Transaccion, Long> 
             @Param("fechaFin") LocalDateTime fechaFin
     );
 
+    List<Transaccion> findByUsuarioIdOrderByFechaDesc(Long idUsuario);
+
     // Filtrar por usuario y rango de dinero
     List<Transaccion> findByUsuarioIdAndValorBetween(Long idUsuario, BigDecimal min, BigDecimal max);
 
