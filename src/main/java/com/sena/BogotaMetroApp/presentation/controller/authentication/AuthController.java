@@ -32,8 +32,8 @@ public class AuthController {
         AuthResponse auth = authService.login(request);
         ResponseCookie cookie = ResponseCookie.from("accessToken", auth.getToken())
                 .httpOnly(true)
-                .secure(false) // True en producción con HTTPS
-                .sameSite("Lax") // O "None" + "secure (true)" si frontend y backend están en dominios diferentes
+                .secure(true) // True en producción con HTTPS y False en desarrollo local sin HTTPS
+                .sameSite("None") // O "None" + "secure (true)" si frontend y backend están en dominios diferentes / Lax si están en el mismo dominio
                 .path("/")
                 .maxAge(Duration.ofHours(10)).build();
 
@@ -45,8 +45,8 @@ public class AuthController {
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         ResponseCookie clearCookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
-                .secure(false) // true en producción
-                .sameSite("Lax")
+                .secure(true) // true en producción
+                .sameSite("None")
                 .path("/")
                 .maxAge(0)
                 .build();

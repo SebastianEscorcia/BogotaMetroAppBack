@@ -25,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Punto de conexión (Handshake). Aquí se conecta el Frontend
-        registry.addEndpoint("/ws-metro").addInterceptors(wsJwtHandshakeInterceptor).setAllowedOriginPatterns("http://localhost:5173", "http://127.0.0.1:5173").withSockJS();
+        registry.addEndpoint("/ws-metro").addInterceptors(wsJwtHandshakeInterceptor).setAllowedOriginPatterns("http://localhost:5173", "http://127.0.0.1:5173", "https://bogota-metro-app-frontend.vercel.app").withSockJS();
     }
 
     @Override
