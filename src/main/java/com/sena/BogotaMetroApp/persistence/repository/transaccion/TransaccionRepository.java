@@ -13,6 +13,8 @@ import java.util.List;
 
 public interface TransaccionRepository extends JpaRepository<Transaccion, Long> {
 
+        List<Transaccion> findByUsuarioIdOrderByFechaDesc(Long idUsuario);
+
     // Buscar pagos por usuario
     List<Transaccion> findByUsuarioDatosPersonalesNumDocumento(String numDocumento);
 
