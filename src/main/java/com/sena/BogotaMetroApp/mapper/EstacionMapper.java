@@ -4,6 +4,7 @@ import com.sena.BogotaMetroApp.presentation.dto.estacion.EstacionResponseDTO;
 import com.sena.BogotaMetroApp.persistence.models.estacion.Estacion;
 import org.springframework.stereotype.Component;
 
+
 @Component
 public class EstacionMapper {
     public EstacionResponseDTO toDTO(Estacion estacion) {

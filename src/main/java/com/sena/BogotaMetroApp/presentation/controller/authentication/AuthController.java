@@ -6,7 +6,6 @@ import com.sena.BogotaMetroApp.presentation.dto.auth.UserAfterAuthDTO;
 import com.sena.BogotaMetroApp.presentation.dto.login.AuthResponse;
 import com.sena.BogotaMetroApp.presentation.dto.login.LoginRequest;
 import com.sena.BogotaMetroApp.services.auth.IAuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

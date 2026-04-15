@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class QrNoUsadoServiceServiceImpl implements IQrNoUsadoService {
+public class QrNoUsadoServiceImpl implements IQrNoUsadoService {
 
     private final QrNoUsadoRepository qrNoUsadoRepository;
 

@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.Persistable;
 
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "pasajeros")

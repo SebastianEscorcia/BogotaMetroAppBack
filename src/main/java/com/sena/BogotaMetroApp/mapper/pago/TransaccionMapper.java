@@ -3,8 +3,6 @@ package com.sena.BogotaMetroApp.mapper.pago;
 import com.sena.BogotaMetroApp.errors.ErrorCodeEnum;
 import com.sena.BogotaMetroApp.persistence.models.DatosPersonales;
 import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
-import com.sena.BogotaMetroApp.persistence.models.transaccion.CobroPasaje;
-import com.sena.BogotaMetroApp.persistence.models.transaccion.PasarSaldo;
 import com.sena.BogotaMetroApp.persistence.models.transaccion.Recarga;
 import com.sena.BogotaMetroApp.persistence.repository.TarjetaVirtualRepository;
 import com.sena.BogotaMetroApp.services.exception.usuario.UsuarioException;

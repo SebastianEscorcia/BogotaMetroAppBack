@@ -185,7 +185,5 @@ public class QrServiceImpl implements IQrService {
 
         return qrRepository.save(qr);
     }
-    private void invalidarCacheQr(Qr qr) {
-        qrCacheService.invalidateFull(qrMapper.toCacheDTO(qr));
-    }
+   
 }

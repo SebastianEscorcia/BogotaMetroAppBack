@@ -14,4 +14,5 @@ public class EstacionRequestDTO {
     private BigDecimal longitud;
     private Boolean esAccesible;
     private String tipo;
+   
 }

@@ -4,7 +4,6 @@ import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionRequest
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionResponseDTO;
 import com.sena.BogotaMetroApp.presentation.dto.interrupcion.InterrupcionUpdateDTO;
 import com.sena.BogotaMetroApp.services.interrupcion.IInterrupcionServices;
-import jakarta.persistence.Embeddable;
 import lombok.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

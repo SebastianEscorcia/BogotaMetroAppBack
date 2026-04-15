@@ -15,3 +15,4 @@ public interface SupportFaqRepository extends JpaRepository<SupportFaq,Long> {
     Boolean existsByQuestionIgnoreCaseAndCategoryFaqIdAndIsActiveTrue(String question, Long categoryId);
     Boolean existsByQuestionIgnoreCaseAndCategoryFaqIdAndIsActiveTrueAndIdNot(String question, Long categoryId, Long id);
 }
+

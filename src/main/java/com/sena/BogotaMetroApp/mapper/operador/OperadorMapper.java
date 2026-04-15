@@ -2,7 +2,6 @@ package com.sena.BogotaMetroApp.mapper.operador;
 
 import com.sena.BogotaMetroApp.mapper.UsuarioMapper;
 import com.sena.BogotaMetroApp.persistence.models.DatosPersonales;
-import com.sena.BogotaMetroApp.persistence.models.Role;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import com.sena.BogotaMetroApp.presentation.dto.operador.OperadorResponseDTO;
 import com.sena.BogotaMetroApp.persistence.models.operador.Operador;

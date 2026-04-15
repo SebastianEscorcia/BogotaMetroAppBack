@@ -1,7 +1,6 @@
 package com.sena.BogotaMetroApp.persistence.repository;
 
 import com.sena.BogotaMetroApp.persistence.models.TarjetaVirtual;
-import com.sena.BogotaMetroApp.persistence.models.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

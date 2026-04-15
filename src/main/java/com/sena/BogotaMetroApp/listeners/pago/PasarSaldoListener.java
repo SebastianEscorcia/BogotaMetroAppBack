@@ -3,7 +3,6 @@ package com.sena.BogotaMetroApp.listeners.pago;
 import com.sena.BogotaMetroApp.events.pago.PasarSaldoEvent;
 import com.sena.BogotaMetroApp.presentation.dto.transaccion.RecargaNotificacionDTO;
 import com.sena.BogotaMetroApp.services.notificationwebsocket.transaccion.ITransaccionNotifier;
-import com.sena.BogotaMetroApp.utils.enums.MedioPagoEnum;
 import com.sena.BogotaMetroApp.utils.enums.TipoTransaccion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -3,14 +3,11 @@ package com.sena.BogotaMetroApp.services.usuario;
 import com.sena.BogotaMetroApp.presentation.dto.usuario.UsuarioRequestDTO;
 import com.sena.BogotaMetroApp.presentation.dto.usuario.UsuarioResponseDTO;
 import com.sena.BogotaMetroApp.mapper.UsuarioMapper;
-import com.sena.BogotaMetroApp.persistence.models.Role;
 import com.sena.BogotaMetroApp.persistence.models.Usuario;
-import com.sena.BogotaMetroApp.persistence.repository.RoleRepository;
 import com.sena.BogotaMetroApp.persistence.repository.UsuarioRepository;
 import com.sena.BogotaMetroApp.services.factory.UsuarioFactory;
 import com.sena.BogotaMetroApp.utils.enums.RoleEnum;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
