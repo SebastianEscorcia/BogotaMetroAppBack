@@ -25,7 +25,7 @@ public class UsuarioFactory {
 
         Usuario usuario = new Usuario();
         usuario.setCorreo(dto.getCorreo());
-        usuario.setClave(dto.getClave());
+        usuario.setClave(encoder.encode(dto.getClave()));
         usuario.setActivo(true);
         usuario.setRol(rol);
 
