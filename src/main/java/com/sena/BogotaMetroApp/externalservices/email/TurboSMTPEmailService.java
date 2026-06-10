@@ -84,10 +84,12 @@ public class TurboSMTPEmailService implements IEmailService {
                 log.info("Correo enviado exitosamente a: {}", correoDestino);
             } else {
                 log.error("Error en respuesta de TurboSMTP: {}", response.getBody());
+                throw new RuntimeException("TurboSMTP respondió con código de error: " + response.getStatusCode());
             }
 
         } catch (Exception e) {
             log.error("Error enviando correo a {}: {}", correoDestino, e.getMessage(), e);
+            throw  e;
         }
     }
 
